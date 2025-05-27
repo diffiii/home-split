@@ -15,4 +15,35 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['username']
 
     def __str__(self):
-        return self.email
+        return f'{self.email} ({self.id})'  # type: ignore
+
+
+class Household(models.Model):
+    name = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    members = models.ManyToManyField(
+        User, through='Membership', related_name='households'
+    )
+
+    class Meta:
+        unique_together = ('name', 'owner')
+
+    def __str__(self):
+        return f'{self.name} ({self.id})'  # type: ignore
+
+
+class Membership(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    household = models.ForeignKey(Household, on_delete=models.CASCADE)
+    joined_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('user', 'household')
+
+    def __str__(self):
+        return (
+            f'{self.user.email} in '
+            f'{self.household.name} ({self.id})'  # type: ignore
+        )
