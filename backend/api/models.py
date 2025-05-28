@@ -15,7 +15,7 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['username']
 
     def __str__(self):
-        return f'{self.email} ({self.id})'  # type: ignore
+        return f'{self.email} ({self.id})'
 
 
 class Household(models.Model):
@@ -44,6 +44,6 @@ class Membership(models.Model):
 
     def __str__(self):
         return (
-            f'{self.user.email} in '
+            f'{self.user.email} in '  # type: ignore
             f'{self.household.name} ({self.id})'  # type: ignore
         )

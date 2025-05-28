@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 from .models import User, Household, Membership
 
@@ -12,6 +14,13 @@ class UserSerializer(serializers.ModelSerializer):
             'profile_image': {'required': False}
         }
 
+    def validate_password(self, value):
+        try:
+            validate_password(value)
+        except ValidationError as e:
+            raise serializers.ValidationError(e.messages)
+        return value
+
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
@@ -24,6 +33,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True},
         }
+
+    def validate_password(self, value):
+        try:
+            validate_password(value)
+        except ValidationError as e:
+            raise serializers.ValidationError(e.messages)
+        return value
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
