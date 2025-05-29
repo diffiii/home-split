@@ -21,12 +21,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-)ao#8(274o@$1wr#h)#ss&v4vh083&0=&z)8y6k09b#j_(tu_7'
+SECRET_KEY = 'django-insecure-h-55yx*ei1c4kxy)91%l9ct%pca^d3ghk-u@ital1_#rpq3^52'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -35,16 +36,58 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
-JAZZMIN_UI_TWEAKS = {
-    "theme": "flatly",
+JAZZMIN_SETTINGS = {
+    'theme': 'flatly',
 }
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'HomeSplit API',
+    'VERSION': '0.0.1',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'SWAGGER_UI_SETTINGS': {
+        'persistAuthorization': True,
+        'defaultModelsExpandDepth': -1
+    },
+    'SORT_OPERATIONS': True,
+    'SORT_OPERATIONS_PARAMETERS': True,
+    'TAGS': [
+        {
+            'name': '1. Users',
+            'description': 'User management operations',
+        },
+        {
+            'name': '2. Authentication',
+            'description': 'Authentication operations',
+        },
+        {
+            'name': '3. Households',
+            'description': 'Household management operations',
+        },
+        {
+            'name': '4. Memberships',
+            'description': 'Membership management operations (owner of a household can manage memberships of other members)',
+        },
+    ]
+}
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+MEDIA_ROOT = BASE_DIR / 'media/'
+MEDIA_URL = 'media/'
+
+AUTH_USER_MODEL = 'api.User'
 
 
 # Application definition
@@ -58,7 +101,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt',
     'corsheaders',
+    'drf_spectacular',
     'api',
 ]
 
@@ -70,7 +115,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -102,8 +146,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-AUTH_USER_MODEL = 'api.User'
 
 
 # Password validation
@@ -146,9 +188,3 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-# CORS settings
-
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True

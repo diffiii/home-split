@@ -1,14 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
-from .models import User
+
+from .models import User, Household, Membership
 
 
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('email', 'username', 'is_staff', 'is_active')
-    search_fields = ('email', 'username')
-    ordering = ('email',)
-    list_filter = ('is_staff', 'is_active')
+admin.site.register(User)
+admin.site.register(Household)
+admin.site.register(Membership)
 
-
-admin.site.register(User, UserAdmin)
+# Unregistering the Group model because it's not being used
 admin.site.unregister(Group)

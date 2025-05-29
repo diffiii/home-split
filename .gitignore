@@ -4,3 +4,4 @@ env/
 venv/
 **/*.sqlite3
 .ropeproject/
+backend/media/
