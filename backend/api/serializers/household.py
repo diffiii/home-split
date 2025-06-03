@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
+from .user import UserSerializer
 from ..models import Household, Membership
-from ..serializers.user import UserSerializer
 
 
 class HouseholdSerializer(serializers.ModelSerializer):

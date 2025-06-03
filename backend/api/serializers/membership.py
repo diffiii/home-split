@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from ..models import Membership
-from ..serializers.user import UserSerializer
 
 
 class MembershipSerializer(serializers.ModelSerializer):
