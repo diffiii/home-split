@@ -6,3 +6,7 @@ from .expense import (
     ExpenseListCreateView, ExpenseDetailView, user_expense_summary,
     household_expense_summary
 )
+from .expense_category import (
+    ExpenseCategoryListCreateView, ExpenseCategoryDetailView,
+    household_categories
+)

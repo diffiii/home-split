@@ -6,3 +6,7 @@ from .expense import (
     ExpenseSplitSerializer,
     ExpenseListSerializer
 )
+from .expense_category import (
+    ExpenseCategorySerializer,
+    ExpenseCategoryListSerializer
+)

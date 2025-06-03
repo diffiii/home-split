@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from ..models import Expense, Household
+from ..models import Expense, Household, ExpenseCategory
 from ..serializers import ExpenseSerializer, ExpenseListSerializer
 
 
@@ -24,20 +24,28 @@ class ExpenseListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):  # type: ignore
         """
         Return expenses from households where the user is a member.
-        Optionally filter by household_id query parameter.
+        Optionally filter by household_id, category_id, payer_id, or settlement status.
         """
         user = self.request.user
         queryset = Expense.objects.filter(
             household__members=user
         ).select_related(
-            'household', 'author', 'payer'
+            'household', 'author', 'payer', 'category'
         ).prefetch_related('splits__user')
 
         # Filter by household if provided
         household_id = self.request.query_params.get(  # type: ignore
-            'household_id')  # type: ignore
+            'household_id'
+        )
         if household_id:
             queryset = queryset.filter(household_id=household_id)
+
+        # Filter by category if provided
+        category_id = self.request.query_params.get(  # type: ignore
+            'category_id'
+        )
+        if category_id:
+            queryset = queryset.filter(category_id=category_id)
 
         # Filter by payer if provided
         payer_id = self.request.query_params.get('payer_id')  # type: ignore
@@ -67,7 +75,17 @@ class ExpenseListCreateView(generics.ListCreateAPIView):
         except Household.DoesNotExist:
             raise PermissionError(
                 'You do not have permission to create expenses in this household.'
-            )
+            )        # Validate category belongs to the same household if provided
+        category_id = serializer.validated_data.get('category_id')
+        if category_id:
+            try:
+                category = ExpenseCategory.objects.get(id=category_id)
+                if category.household.pk != household_id:
+                    raise PermissionError(
+                        'Category does not belong to the specified household.'
+                    )
+            except ExpenseCategory.DoesNotExist:
+                raise PermissionError('Invalid category.')
 
         serializer.save(author=self.request.user)
 
@@ -75,6 +93,8 @@ class ExpenseListCreateView(generics.ListCreateAPIView):
         parameters=[
             OpenApiParameter('household_id', int,
                              description='Filter by household ID'),
+            OpenApiParameter('category_id', int,
+                             description='Filter by category ID'),
             OpenApiParameter(
                 'payer_id', int, description='Filter by payer ID'),
             OpenApiParameter(

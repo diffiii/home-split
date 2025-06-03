@@ -7,6 +7,8 @@ from .household import Household
 class Expense(models.Model):
     household = models.ForeignKey(Household, on_delete=models.CASCADE,
                                   related_name='expenses')
+    category = models.ForeignKey('ExpenseCategory', on_delete=models.SET_NULL,
+                                 related_name='expenses', blank=True, null=True)
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=300, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)

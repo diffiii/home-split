@@ -4,12 +4,16 @@ from django.db.models import Sum
 from .user import UserSerializer
 from .household import HouseholdSerializer
 from .expense_split import ExpenseSplitSerializer
+from .expense_category import ExpenseCategoryListSerializer
 from ..models import Expense, ExpenseSplit
 
 
 class ExpenseSerializer(serializers.ModelSerializer):
     household = HouseholdSerializer(read_only=True)
     household_id = serializers.IntegerField(write_only=True)
+    category = ExpenseCategoryListSerializer(read_only=True)
+    category_id = serializers.IntegerField(
+        write_only=True, required=False, allow_null=True)
     author = UserSerializer(read_only=True)
     payer = UserSerializer(read_only=True)
     payer_id = serializers.IntegerField(write_only=True)
@@ -21,9 +25,9 @@ class ExpenseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Expense
         fields = (
-            'id', 'household', 'household_id', 'name', 'description',
-            'amount', 'author', 'payer', 'payer_id', 'created_at',
-            'splits', 'splits_data'
+            'id', 'household', 'household_id', 'category', 'category_id',
+            'name', 'description', 'amount', 'author', 'payer', 'payer_id',
+            'created_at', 'splits', 'splits_data'
         )
 
     def validate_household_id(self, value):
