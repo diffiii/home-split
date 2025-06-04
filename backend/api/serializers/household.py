@@ -1,17 +1,19 @@
 from rest_framework import serializers
 
 from .user import UserSerializer
+from .task import TaskSerializer
 from ..models import Household, Membership
 
 
 class HouseholdSerializer(serializers.ModelSerializer):
     owner = UserSerializer(read_only=True)
     members = serializers.SerializerMethodField()
+    tasks = TaskSerializer(many=True, read_only=True)
 
     class Meta:
         model = Household
         fields = ('id', 'name', 'description',
-                  'owner', 'members', 'created_at')
+                  'owner', 'members', 'tasks', 'created_at')
 
     def get_members(self, obj):
         members = obj.members.all()

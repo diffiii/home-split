@@ -9,7 +9,7 @@ from ..models import Expense, Household, ExpenseCategory
 from ..serializers import ExpenseSerializer, ExpenseListSerializer
 
 
-@extend_schema(tags=['4. Expenses'])
+@extend_schema(tags=['6. Expenses'])
 class ExpenseListCreateView(generics.ListCreateAPIView):
     """
     List expenses for authenticated user's households or create a new expense.
@@ -105,7 +105,7 @@ class ExpenseListCreateView(generics.ListCreateAPIView):
         return super().get(request, *args, **kwargs)
 
 
-@extend_schema(tags=['4. Expenses'])
+@extend_schema(tags=['6. Expenses'])
 class ExpenseDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     Retrieve, update, or delete an expense.
@@ -158,7 +158,7 @@ class ExpenseDetailView(generics.RetrieveUpdateDestroyAPIView):
         instance.delete()
 
 
-@extend_schema(tags=['4. Expenses'])
+@extend_schema(tags=['6. Expenses'])
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def user_expense_summary(request):
@@ -208,7 +208,7 @@ def user_expense_summary(request):
     return Response(summary, status=status.HTTP_200_OK)
 
 
-@extend_schema(tags=['4. Expenses'])
+@extend_schema(tags=['6. Expenses'])
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def household_expense_summary(request, household_id):

@@ -10,3 +10,7 @@ from .expense_category import (
     ExpenseCategorySerializer,
     ExpenseCategoryListSerializer
 )
+from .task import (
+    TaskSerializer,
+    TaskCreateUpdateSerializer
+)

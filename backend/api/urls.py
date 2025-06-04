@@ -7,6 +7,7 @@ from .views import (
     MembershipListCreateView, MembershipDetailView,
     ExpenseListCreateView, ExpenseDetailView, user_expense_summary, household_expense_summary,
     ExpenseCategoryListCreateView, ExpenseCategoryDetailView, household_categories,
+    TaskListCreateView, TaskDetailView
 )
 
 urlpatterns = [
@@ -26,4 +27,7 @@ urlpatterns = [
     path('categories/', ExpenseCategoryListCreateView.as_view()),
     path('categories/<int:pk>/', ExpenseCategoryDetailView.as_view()),
     path('households/<int:household_id>/categories/', household_categories),
+    path('households/<int:household_id>/tasks/',
+         TaskListCreateView.as_view()),
+    path('tasks/<int:pk>/', TaskDetailView.as_view()),
 ]

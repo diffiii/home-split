@@ -76,7 +76,20 @@ SPECTACULAR_SETTINGS = {
         },
         {
             'name': '4. Memberships',
-            'description': 'Membership management operations (owner of a household can manage memberships of other members)',
+            'description': 'Membership management operations '
+            '(owner of a household can manage memberships of other members)',
+        },
+        {
+            'name': '5. Expense Categories',
+            'description': 'Expense category management operations',
+        },
+        {
+            'name': '6. Expenses',
+            'description': 'Expense management operations',
+        },
+        {
+            'name': '7. Tasks',
+            'description': 'Task management operations',
         },
     ]
 }
