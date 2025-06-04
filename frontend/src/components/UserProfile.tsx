@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import Modal from './Modal';
 import Button from './Button';
 import Input from './Input';
+import ProfilePictureUpload from './ProfilePictureUpload';
 import { userAPI } from '../services/api';
 
 interface UserProfileProps {
@@ -21,6 +22,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [isPictureLoading, setIsPictureLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +93,11 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
     } catch (err: any) {
       console.error('Profile update error:', err);
       
-      setError(
+      const capitalizeFirstLetter = (str: string) => {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      }
+
+      setError(capitalizeFirstLetter(
         err.response?.data?.current_password?.[0] ||
         err.response?.data?.password?.[0] ||
         err.response?.data?.email?.[0] ||
@@ -99,9 +105,50 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
         err.response?.data?.detail ||
         err.response?.data?.non_field_errors?.[0] ||
         'Profile update failed. Please try again.'
-      );
+      ));
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleProfilePictureUpload = async (file: File) => {
+    setError('');
+    setSuccess('');
+    setIsPictureLoading(true);
+
+    try {
+      const updatedUser = await userAPI.uploadProfilePicture(file);
+      updateUser(updatedUser);
+      setSuccess('Profile picture updated successfully!');
+    } catch (err: any) {
+      console.error('Profile picture upload error:', err);
+      setError(
+        err.response?.data?.profile_picture?.[0] ||
+        err.response?.data?.detail ||
+        'Failed to upload profile picture. Please try again.'
+      );
+    } finally {
+      setIsPictureLoading(false);
+    }
+  };
+
+  const handleProfilePictureRemove = async () => {
+    setError('');
+    setSuccess('');
+    setIsPictureLoading(true);
+
+    try {
+      const updatedUser = await userAPI.removeProfilePicture();
+      updateUser(updatedUser);
+      setSuccess('Profile picture removed successfully!');
+    } catch (err: any) {
+      console.error('Profile picture removal error:', err);
+      setError(
+        err.response?.data?.detail ||
+        'Failed to remove profile picture. Please try again.'
+      );
+    } finally {
+      setIsPictureLoading(false);
     }
   };
 
@@ -114,6 +161,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
     setShowPasswordChange(false);
     setError('');
     setSuccess('');
+    setIsPictureLoading(false);
     onClose();
   };
 
@@ -132,25 +180,41 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
           </div>
         )}
 
-        <div className="space-y-4">
-          <Input
-            label="Username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            placeholder="Enter your username"
-          />
+        <div className="space-y-6">
+          {/* Profile Picture Section */}
+          <div className="pb-4 border-gray-200">
+            <ProfilePictureUpload
+              user={user}
+              onUpload={handleProfilePictureUpload}
+              onRemove={handleProfilePictureRemove}
+              isLoading={isPictureLoading}
+            />
+          </div>
 
-          <Input
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            placeholder="Enter your email"
-          />
+          {/* Profile Information */}
+          <div>
+            <div className="space-y-4">
+            <Input
+              label="Username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              placeholder="Enter your username"
+            />
 
+            <Input
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="Enter your email"
+            />
+            </div>
+          </div>
+
+          {/* Password Change Section */}
           <div className="pt-4 border-t border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-medium text-gray-700">Change Password</h3>

@@ -70,8 +70,37 @@ export const authAPI = {
 };
 
 export const userAPI = {
+  getUser: async (userId: number): Promise<User | null> => {
+    try {
+      const response = await api.get('/users/');
+      const users = response.data;
+      return users.find((user: User) => user.id === userId) || null;
+    } catch (error) {
+      return null;
+    }
+  },
+
   updateProfile: async (data: Partial<User & { current_password?: string; password?: string }>): Promise<User> => {
     const response = await api.patch('/users/detail/', data);
+    return response.data;
+  },
+
+  uploadProfilePicture: async (file: File): Promise<User> => {
+    const formData = new FormData();
+    formData.append('profile_picture', file);
+    
+    const response = await api.patch('/users/detail/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  removeProfilePicture: async (): Promise<User> => {
+    const response = await api.patch('/users/detail/', {
+      profile_picture: null,
+    });
     return response.data;
   },
 

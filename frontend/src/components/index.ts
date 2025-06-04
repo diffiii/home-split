@@ -8,3 +8,7 @@ export { default as Login } from './Login';
 export { default as Register } from './Register';
 export { default as Modal } from './Modal';
 export { default as UserProfile } from './UserProfile';
+export { default as UserAvatar } from './UserAvatar';
+export { default as MobileMenu } from './MobileMenu';
+export { default as NavLink } from './NavLink';
+export { default as ProfilePictureUpload } from './ProfilePictureUpload';
