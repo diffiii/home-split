@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Household, Membership, RawMembership } from '../types';
-import { householdAPI, membershipAPI } from '../services/api';
+import { householdAPI, membershipAPI, expenseAPI } from '../services/api';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import HouseholdCard from '../components/HouseholdCard';
@@ -91,6 +91,29 @@ const Dashboard: React.FC = () => {
     created_at: ''
   });
 
+  const createDefaultCategories = async (householdId: number) => {
+      const defaultCategories = [
+        { name: 'Housing', icon: '🏠' },
+        { name: 'Food', icon: '🍽️' },
+        { name: 'Entertainment', icon: '🎬' },
+        { name: 'Transport', icon: '🚗' },
+        { name: 'Life & Personal', icon: '👤' },
+        { name: 'Other', icon: '📝' },
+      ];
+  
+      try {
+        for (const category of defaultCategories) {
+          await expenseAPI.createExpenseCategory({
+            household_id: householdId,
+            name: category.name,
+            icon: category.icon
+          });
+        }
+      } catch (err) {
+        console.error('Failed to create default categories:', err);
+      }
+    };
+
   const handleCreateHousehold = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -100,6 +123,8 @@ const Dashboard: React.FC = () => {
         name: newHouseholdName,
         description: newHouseholdDescription || undefined,
       });
+
+      createDefaultCategories(newHousehold.id);
       
       setHouseholds(prev => [...prev, newHousehold]);
       resetCreateForm();

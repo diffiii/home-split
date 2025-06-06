@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AuthTokens, LoginCredentials, RegisterData, User, Household, Membership, RawMembership } from '../types';
+import { AuthTokens, LoginCredentials, RegisterData, User, Household, Membership, RawMembership, Expense, CreateExpenseData, ExpenseCategory } from '../types';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
@@ -133,6 +133,15 @@ export const householdAPI = {
     const response = await api.get(`/households/${id}/`);
     return response.data;
   },
+
+  updateHousehold: async (id: number, data: { name?: string; description?: string }): Promise<Household> => {
+    const response = await api.patch(`/households/${id}/`, data);
+    return response.data;
+  },
+
+  deleteHousehold: async (id: number): Promise<void> => {
+    await api.delete(`/households/${id}/`);
+  },
 };
 
 export const membershipAPI = {
@@ -173,6 +182,41 @@ export const membershipAPI = {
 
   removeMember: async (membershipId: number): Promise<void> => {
     await api.delete(`/memberships/${membershipId}/`);
+  },
+};
+
+export const expenseAPI = {
+  getExpenses: async (householdId: number): Promise<Expense[]> => {
+    const response = await api.get(`/expenses/?household_id=${householdId}`);
+    const expenses = response.data;
+    
+    const expensesWithSplits = await Promise.all(
+      expenses.map(async (expense: Expense) => {
+        try {
+          const detailResponse = await api.get(`/expenses/${expense.id}/`);
+          return detailResponse.data;
+        } catch (error) {
+          return expense;
+        }
+      })
+    );
+    
+    return expensesWithSplits;
+  },
+
+  createExpense: async (data: CreateExpenseData): Promise<Expense> => {
+    const response = await api.post('/expenses/', data);
+    return response.data;
+  },
+
+  getHouseholdCategories: async (householdId: number): Promise<ExpenseCategory[]> => {
+    const response = await api.get(`/households/${householdId}/categories/`);
+    return response.data;
+  },
+
+  createExpenseCategory: async (data: { household_id: number; name: string; icon: string }): Promise<ExpenseCategory> => {
+    const response = await api.post('/categories/', data);
+    return response.data;
   },
 };
 

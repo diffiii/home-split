@@ -5,7 +5,7 @@ import { userAPI } from '../services/api';
 interface UserAvatarProps {
   user?: User | null;
   userId?: number;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }
 
@@ -35,6 +35,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ user, userId, size = 'md', clas
   const currentUser = user || fetchedUser;
 
   const sizeClasses = {
+    xs: 'w-6 h-6 text-xs',
     sm: 'w-8 h-8 text-sm',
     md: 'w-10 h-10 text-sm',
     lg: 'w-12 h-12 text-base',

@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Household, User } from '../types';
-import { householdAPI} from '../services/api';
+import { Household, User, Expense } from '../types';
+import { householdAPI, expenseAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import UserAvatar from '../components/UserAvatar';
+import ExpenseList from '../components/ExpenseList';
+import AddExpense from '../components/AddExpense';
+import HouseholdOptionsModal from '../components/HouseholdOptionsModal';
 
 const HouseholdIcon: React.FC<{ name: string; size?: 'small' | 'large' }> = ({ name, size = 'large' }) => {
     const sizeClasses = size === 'small' ? 'w-16 h-16' : 'w-20 h-20';
@@ -86,16 +90,27 @@ const MemberList: React.FC<{
 const HouseholdDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [household, setHousehold] = useState<Household | null>(null);
+    const [expenses, setExpenses] = useState<Expense[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingExpenses, setIsLoadingExpenses] = useState(false);
     const [error, setError] = useState('');
     const [showMembers, setShowMembers] = useState(false);
+    const [showAddExpense, setShowAddExpense] = useState(false);
+    const [showHouseholdOptions, setShowHouseholdOptions] = useState(false);
 
     useEffect(() => {
         if (id) {
         fetchHousehold(parseInt(id));   
         }
     }, [id]);
+
+    useEffect(() => {
+        if (household) {
+            fetchExpenses(household.id);
+        }
+    }, [household]);
 
     const fetchHousehold = async (householdId: number) => {
         try {
@@ -107,6 +122,31 @@ const HouseholdDetail: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const fetchExpenses = async (householdId: number) => {
+        try {
+            setIsLoadingExpenses(true);
+            const expensesData = await expenseAPI.getExpenses(householdId);
+            setExpenses(expensesData);
+        } finally {
+            setIsLoadingExpenses(false);
+        }
+    };
+
+    const handleExpenseAdded = () => {
+        setShowAddExpense(false);
+        if (household) {
+            fetchExpenses(household.id);
+        }
+    };
+
+    const handleHouseholdUpdated = (updatedHousehold: Household) => {
+        setHousehold(updatedHousehold);
+    };
+
+    const handleHouseholdDeleted = () => {
+        navigate('/dashboard');
     };
 
     if (isLoading) {
@@ -153,23 +193,38 @@ const HouseholdDetail: React.FC = () => {
     }
 
     const activeMembers = household.members.filter(member => member.is_active !== false);
+    const isOwner = user?.id === household.owner.id;
 
     return (
         <div className="min-h-screen bg-white">
         <Header />
         
         <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-            <div className="mb-6">
-            <Button 
-                onClick={() => navigate('/dashboard')} 
-                variant="outline"
-                className="flex items-center"
-            >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Back to Dashboard
-            </Button>
+            <div className="mb-6 flex justify-between items-center">
+                <Button 
+                    onClick={() => navigate('/dashboard')} 
+                    variant="outline"
+                    className="flex items-center"
+                >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Back to Dashboard
+                </Button>
+                
+                {isOwner && (
+                    <Button
+                        onClick={() => setShowHouseholdOptions(true)}
+                        variant="outline"
+                        className="flex items-center space-x-2"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span>Options</span>
+                    </Button>
+                )}
             </div>
 
             <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-8 mb-8">
@@ -232,16 +287,59 @@ const HouseholdDetail: React.FC = () => {
             </div>
 
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-                <h2 className="text-xl font-medium text-black mb-6">Expenses</h2>
-                <div className="text-center py-12 text-gray-600">
-                    <svg className="mx-auto h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No expenses yet</h3>
-                    <p className="mb-6">Start tracking expenses for this household.</p>
-                    <Button variant="primary">Add Expense</Button>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-medium text-black">Expenses</h2>
+                    <div className="flex space-x-3">
+                        <Button 
+                            variant="primary" 
+                            onClick={() => setShowAddExpense(true)}
+                        >
+                            Add Expense
+                        </Button>
+                    </div>
                 </div>
+                
+                {isLoadingExpenses ? (
+                    <div className="flex items-center justify-center py-12">
+                        <div className="flex items-center space-x-2 text-gray-600">
+                            <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Loading expenses...</span>
+                        </div>
+                    </div>
+                ) : user ? (
+                    <ExpenseList 
+                        expenses={expenses}
+                        currentUserId={user.id}
+                        householdMembers={activeMembers}
+                    />
+                ) : null}
             </div>
+
+            {/* Add Expense Modal */}
+            {showAddExpense && user && (
+                <AddExpense
+                    householdId={household.id}
+                    householdMembers={activeMembers}
+                    currentUserId={user.id}
+                    onExpenseAdded={handleExpenseAdded}
+                    onCancel={() => setShowAddExpense(false)}
+                />
+            )}
+
+            {/* Household Options Modal */}
+            {showHouseholdOptions && user && isOwner && (
+                <HouseholdOptionsModal
+                    isOpen={showHouseholdOptions}
+                    onClose={() => setShowHouseholdOptions(false)}
+                    household={household}
+                    currentUser={user}
+                    onHouseholdUpdated={handleHouseholdUpdated}
+                    onHouseholdDeleted={handleHouseholdDeleted}
+                />
+            )}
         </main>
         </div>
     );
