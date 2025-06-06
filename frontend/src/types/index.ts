@@ -86,7 +86,7 @@ export interface CreateExpenseSplit {
 
 export interface CreateExpenseData {
   household_id: number;
-  category_id: number;
+  category_id?: number;
   name: string;
   description: string;
   amount: string;

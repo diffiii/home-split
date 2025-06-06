@@ -90,11 +90,6 @@ const AddExpense: React.FC<AddExpenseProps> = ({
       return;
     }
     
-    if (formData.category_id === 0 || !formData.category_id) {
-      setError('Please select a category');
-      return;
-    }
-
     if (!splitConfiguration || splitConfiguration.members.length === 0) {
       setError('Please select at least one member for the split');
       return;
@@ -110,12 +105,12 @@ const AddExpense: React.FC<AddExpenseProps> = ({
 
       const expenseData: CreateExpenseData = {
         household_id: householdId,
-        category_id: formData.category_id,
         name: formData.name,
         description: formData.description,
         amount: formData.amount,
         payer_id: formData.payer_id,
-        splits_data
+        splits_data,
+        ...(formData.category_id > 0 && { category_id: formData.category_id })
       };
 
       await expenseAPI.createExpense(expenseData);
@@ -223,7 +218,6 @@ const AddExpense: React.FC<AddExpenseProps> = ({
                 value={formData.category_id}
                 onChange={(value) => setFormData({ ...formData, category_id: value })}
                 placeholder={categories.length === 0 ? 'No categories available' : 'Select a category'}
-                required
               />
 
               {/* Choose Members Button */}
