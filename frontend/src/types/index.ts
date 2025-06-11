@@ -147,3 +147,23 @@ export interface HouseholdExpenseSummary {
   user_amount_owed: number;
   user_balance: number;
 }
+
+export interface ShoppingListItem {
+  id: number;
+  name: string;
+  quantity: number;
+  unit?: string;
+  household: number;
+  is_purchased: boolean;
+  added_at: string;
+  purchased_at?: string;
+  added_by: User;
+  purchased_by?: User;
+}
+
+export interface CreateShoppingListItemData {
+  name: string;
+  quantity: number;
+  unit?: string;
+  household?: number;
+}

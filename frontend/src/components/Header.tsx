@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useHousehold } from '../context/HouseholdContext';
 import Button from './Button';
 import UserProfile from './UserProfile';
 import UserAvatar from './UserAvatar';
@@ -9,6 +10,7 @@ import NavLink from './NavLink';
 
 const Header: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth();
+  const { currentHousehold } = useHousehold();
   const location = useLocation();
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -40,6 +42,13 @@ const Header: React.FC = () => {
                 <NavLink to="/dashboard" isActive={isActive('/dashboard')}>
                   Dashboard
                 </NavLink>
+                {currentHousehold && (
+                  <>
+                    <span className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-black transition-colors duration-150">
+                      {currentHousehold.name}
+                    </span>
+                  </>
+                )}
               </nav>
             )}
           </div>

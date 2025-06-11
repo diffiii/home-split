@@ -20,3 +20,5 @@ export { default as CategoryManagement } from './CategoryManagement';
 export { default as TaskList } from './TaskList';
 export { default as AddTask } from './AddTask';
 export { default as ExpenseSummary } from './ExpenseSummary';
+export { default as ShoppingList } from './ShoppingList';
+export { default as AddShoppingListItem } from './AddShoppingListItem';

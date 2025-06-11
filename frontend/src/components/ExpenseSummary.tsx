@@ -111,7 +111,11 @@ const ExpenseSummary: React.FC<ExpenseSummaryProps> = ({ summary, isLoading }) =
 
           <div className="bg-gray-50 rounded-lg p-2 sm:p-4 col-span-2 lg:col-span-1">
             <div className="text-xs sm:text-sm text-gray-600 mb-1">Net Balance</div>
-            <div className="text-base sm:text-xl font-semibold text-black">
+            <div className={`text-base sm:text-xl font-semibold ${
+              userBalance > 0 ? 'text-green-600' : 
+              userBalance < 0 ? 'text-red-600' : 
+              'text-black'
+            }`}>
               {userBalance === 0 ? 'Even' : formatCurrency(Math.abs(userBalance))}
               {isOwedMoney && <span className="block text-xs text-gray-500">(owed to you)</span>}
               {isOwingMoney && <span className="block text-xs text-gray-500">(you owe)</span>}

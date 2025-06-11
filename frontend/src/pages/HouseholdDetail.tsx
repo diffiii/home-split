@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Household, User, Expense, Task, HouseholdExpenseSummary } from '../types';
-import { householdAPI, expenseAPI, taskAPI } from '../services/api';
+import { Household, User, Expense, Task, HouseholdExpenseSummary, ShoppingListItem } from '../types';
+import { householdAPI, expenseAPI, taskAPI, shoppingListAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useHousehold } from '../context/HouseholdContext';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import UserAvatar from '../components/UserAvatar';
@@ -12,6 +13,8 @@ import HouseholdOptionsModal from '../components/HouseholdOptionsModal';
 import CategoryManagement from '../components/CategoryManagement';
 import TaskList from '../components/TaskList';
 import AddTask from '../components/AddTask';
+import ShoppingList from '../components/ShoppingList';
+import AddShoppingListItem from '../components/AddShoppingListItem';
 import Modal from '../components/Modal';
 import InviteMember from '../components/InviteMember';
 import ExpenseSummary from '../components/ExpenseSummary';
@@ -150,22 +153,27 @@ const HouseholdDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { setCurrentHousehold } = useHousehold();
   const [household, setHousehold] = useState<Household | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [shoppingListItems, setShoppingListItems] = useState<ShoppingListItem[]>([]);
   const [expenseSummary, setExpenseSummary] = useState<HouseholdExpenseSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingExpenses, setIsLoadingExpenses] = useState(false);
   const [isLoadingTasks, setIsLoadingTasks] = useState(false);
+  const [isLoadingShoppingList, setIsLoadingShoppingList] = useState(false);
   const [isLoadingSummary, setIsLoadingSummary] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'expenses' | 'tasks'>('expenses');
+  const [activeTab, setActiveTab] = useState<'expenses' | 'tasks' | 'shopping'>('expenses');
   const [showMembers, setShowMembers] = useState(false);
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [showAddTask, setShowAddTask] = useState(false);
+  const [showAddShoppingItem, setShowAddShoppingItem] = useState(false);
   const [showHouseholdOptions, setShowHouseholdOptions] = useState(false);
   const [showCategoryManagement, setShowCategoryManagement] = useState(false);
   const [showInviteMember, setShowInviteMember] = useState(false);
+  const [showExpenseSummary, setShowExpenseSummary] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -177,15 +185,23 @@ const HouseholdDetail: React.FC = () => {
     if (household) {
       fetchExpenses(household.id);
       fetchTasks(household.id);
+      fetchShoppingList(household.id);
       fetchExpenseSummary(household.id);
     }
   }, [household]);
+
+  useEffect(() => {
+    return () => {
+      setCurrentHousehold(null);
+    };
+  }, [setCurrentHousehold]);
 
   const fetchHousehold = async (householdId: number) => {
     try {
       setIsLoading(true);
       const householdData = await householdAPI.getHousehold(householdId);
       setHousehold(householdData);
+      setCurrentHousehold(householdData);
     } catch (err: any) {
       setError('Failed to fetch household details');
     } finally {
@@ -210,6 +226,16 @@ const HouseholdDetail: React.FC = () => {
       setTasks(tasksData);
     } finally {
       setIsLoadingTasks(false);
+    }
+  };
+
+  const fetchShoppingList = async (householdId: number) => {
+    try {
+      setIsLoadingShoppingList(true);
+      const shoppingListData = await shoppingListAPI.getShoppingList(householdId);
+      setShoppingListItems(shoppingListData);
+    } finally {
+      setIsLoadingShoppingList(false);
     }
   };
 
@@ -246,11 +272,25 @@ const HouseholdDetail: React.FC = () => {
     }
   };
 
+  const handleShoppingItemAdded = () => {
+    setShowAddShoppingItem(false);
+    if (household) {
+      fetchShoppingList(household.id);
+    }
+  };
+
+  const handleShoppingListUpdated = () => {
+    if (household) {
+      fetchShoppingList(household.id);
+    }
+  };
+
   const handleHouseholdUpdated = (updatedHousehold: Household) => {
     setHousehold(updatedHousehold);
   };
 
   const handleHouseholdDeleted = () => {
+    setCurrentHousehold(null);
     navigate('/dashboard');
   };
 
@@ -457,6 +497,16 @@ const HouseholdDetail: React.FC = () => {
             >
               Tasks
             </button>
+            <button
+              onClick={() => setActiveTab('shopping')}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'shopping'
+                  ? 'border-black text-black'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Shopping List
+            </button>
           </div>
 
           {/* Tab Content */}
@@ -465,6 +515,45 @@ const HouseholdDetail: React.FC = () => {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-3 sm:space-y-0">
                 <h2 className="text-xl font-medium text-black">Expenses</h2>
                 <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowExpenseSummary(!showExpenseSummary)}
+                    className="w-full sm:w-auto flex items-center justify-center"
+                  >
+                    <svg
+                      className="w-4 h-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      {showExpenseSummary ? (
+                        <>
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 11-4.243-4.243m4.242 4.242L9.88 9.88"
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                          />
+                        </>
+                      )}
+                    </svg>
+                    {showExpenseSummary ? 'Hide' : 'Show'} Summary
+                  </Button>
                   <Button
                     variant="outline"
                     onClick={() => setShowCategoryManagement(true)}
@@ -496,7 +585,7 @@ const HouseholdDetail: React.FC = () => {
               </div>
 
               {/* Expense Summary */}
-              {expenseSummary && (
+              {showExpenseSummary && expenseSummary && (
                 <ExpenseSummary 
                   summary={expenseSummary} 
                   isLoading={isLoadingSummary} 
@@ -537,7 +626,7 @@ const HouseholdDetail: React.FC = () => {
                 />
               ) : null}
             </>
-          ) : (
+          ) : activeTab === 'tasks' ? (
             <>
               {tasks.length === 0 && (
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-3 sm:space-y-0">
@@ -620,6 +709,90 @@ const HouseholdDetail: React.FC = () => {
                 />
               ) : null}
             </>
+          ) : (
+            <>
+              {/* Shopping List Tab Content */}
+              {shoppingListItems.length === 0 && (
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-3 sm:space-y-0">
+                  <h2 className="text-xl font-medium text-black">Shopping List</h2>
+                  <div className="flex w-full sm:w-auto">
+                    <Button
+                      variant="primary"
+                      onClick={() => setShowAddShoppingItem(true)}
+                      className="w-full sm:w-auto flex items-center justify-center"
+                    >
+                      <svg
+                        className="w-4 h-4 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        />
+                      </svg>
+                      Add Item
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {isLoadingShoppingList ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="flex items-center space-x-2 text-gray-600">
+                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span>Loading shopping list...</span>
+                  </div>
+                </div>
+              ) : user ? (
+                <ShoppingList
+                  items={shoppingListItems}
+                  currentUserId={user.id}
+                  householdMembers={activeMembers}
+                  onItemUpdated={handleShoppingListUpdated}
+                  householdId={household.id}
+                  addItemButton={
+                    <Button
+                      variant="primary"
+                      onClick={() => setShowAddShoppingItem(true)}
+                      className="w-full sm:w-auto flex items-center justify-center"
+                    >
+                      <svg
+                        className="w-4 h-4 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        />
+                      </svg>
+                      Add Item
+                    </Button>
+                  }
+                />
+              ) : null}
+            </>
           )}
         </div>
 
@@ -640,6 +813,15 @@ const HouseholdDetail: React.FC = () => {
             householdId={household.id}
             onTaskAdded={handleTaskAdded}
             onCancel={() => setShowAddTask(false)}
+          />
+        )}
+
+        {/* Add Shopping Item Modal */}
+        {showAddShoppingItem && user && (
+          <AddShoppingListItem
+            householdId={household.id}
+            onItemAdded={handleShoppingItemAdded}
+            onCancel={() => setShowAddShoppingItem(false)}
           />
         )}
 

@@ -13,7 +13,9 @@ import {
   Task,
   CreateTaskData,
   ExpenseSummary,
-  HouseholdExpenseSummary
+  HouseholdExpenseSummary,
+  ShoppingListItem,
+  CreateShoppingListItemData
 } from '../types';
 
 const API_BASE_URL = 'http://localhost:8000/api';
@@ -283,6 +285,27 @@ export const taskAPI = {
 
   deleteTask: async (taskId: number): Promise<void> => {
     await api.delete(`/tasks/${taskId}/`);
+  }
+};
+
+export const shoppingListAPI = {
+  getShoppingList: async (householdId: number): Promise<ShoppingListItem[]> => {
+    const response = await api.get(`/households/${householdId}/shopping-list/`);
+    return response.data;
+  },
+
+  createShoppingListItem: async (householdId: number, data: CreateShoppingListItemData): Promise<ShoppingListItem> => {
+    const response = await api.post(`/households/${householdId}/shopping-list/`, data);
+    return response.data;
+  },
+
+  updateShoppingListItem: async (itemId: number, data: Partial<CreateShoppingListItemData & { is_purchased?: boolean; purchased_by?: number }>): Promise<ShoppingListItem> => {
+    const response = await api.patch(`/shopping-lists/${itemId}/`, data);
+    return response.data;
+  },
+
+  deleteShoppingListItem: async (itemId: number): Promise<void> => {
+    await api.delete(`/shopping-lists/${itemId}/`);
   }
 };
 
