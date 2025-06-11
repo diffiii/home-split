@@ -44,8 +44,8 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
-JAZZMIN_SETTINGS = {
-    'theme': 'flatly',
+JAZZMIN_UI_TWEAKS = {
+    'theme': 'darkly',
 }
 
 SPECTACULAR_SETTINGS = {

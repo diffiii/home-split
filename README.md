@@ -2,6 +2,8 @@
 
 HomeSplit is a web application designed to simplify household managemnt by enabling users to track expenses, manage tasks, share responsibilities, and create shopping lists with other members.
 
+![HomeSplit Home Page](.assets/homepage.png)
+
 ## Features
 TODO: ...
 
@@ -51,6 +53,18 @@ home-split/
 - Python 3.8+
 - Node.js 16+
 - npm or yarn
+
+### General Project Setup
+
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/diffiii/home-split
+    ```
+
+2. Navigate to the project directory:
+    ```bash
+    cd home-split
+    ```
 
 ### Backend Setup
 
@@ -121,3 +135,7 @@ The frontend will be available at `http://localhost:3000/`.
 ### API Endpoints
 
 The list of available API endpoints can be found at `http://localhost:8000/api/docs/` once the backend server is running. This includes endpoints for user authentication, expense tracking, task management, and more.
+
+## Licence
+
+This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) file for details.

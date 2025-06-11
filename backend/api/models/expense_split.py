@@ -13,6 +13,7 @@ class ExpenseSplit(models.Model):
 
     class Meta:
         unique_together = ('expense', 'user')
+        verbose_name_plural = 'Expense Splits'
 
     def __str__(self):
         return (
