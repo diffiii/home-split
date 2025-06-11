@@ -91,6 +91,10 @@ SPECTACULAR_SETTINGS = {
             'name': '7. Tasks',
             'description': 'Task management operations',
         },
+        {
+            'name': '8. Shopping List Items',
+            'description': 'Shopping list item management operations',
+        },
     ]
 }
 

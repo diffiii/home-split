@@ -14,3 +14,4 @@ from .task import (
     TaskSerializer,
     TaskCreateUpdateSerializer
 )
+from .shopping_list_item import ShoppingListItemSerializer

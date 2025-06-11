@@ -29,3 +29,7 @@ from .task import (
     TaskListCreateView,
     TaskDetailView
 )
+from .shopping_list_item import (
+    ShoppingListItemListCreateView,
+    ShoppingListItemDetailView
+)
