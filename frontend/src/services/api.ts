@@ -11,7 +11,9 @@ import {
   CreateExpenseData,
   ExpenseCategory,
   Task,
-  CreateTaskData
+  CreateTaskData,
+  ExpenseSummary,
+  HouseholdExpenseSummary
 } from '../types';
 
 const API_BASE_URL = 'http://localhost:8000/api';
@@ -250,6 +252,16 @@ export const expenseAPI = {
 
   deleteExpenseCategory: async (categoryId: number): Promise<void> => {
     await api.delete(`/categories/${categoryId}/`);
+  },
+
+  getUserExpenseSummary: async (): Promise<ExpenseSummary> => {
+    const response = await api.get('/expenses/summary/');
+    return response.data;
+  },
+
+  getHouseholdExpenseSummary: async (householdId: number): Promise<HouseholdExpenseSummary> => {
+    const response = await api.get(`/households/${householdId}/expenses/summary/`);
+    return response.data;
   }
 };
 

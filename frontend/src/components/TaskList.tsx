@@ -48,18 +48,25 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, currentUserId, onTaskUpdated,
 
     const dueDate = new Date(dueDateString);
     const now = new Date();
+    
+    const isOverdue = now > dueDate;
+    
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const taskDate = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
-
+    
     const diffTime = taskDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
     let dueDateClass = 'text-gray-600';
     let dueDateText = '';
 
-    if (diffDays < 0) {
+    if (isOverdue && diffDays <= 0) {
       dueDateClass = 'text-red-600';
-      dueDateText = `Overdue`;
+      if (diffDays === 0) {
+        dueDateText = 'Overdue';
+      } else {
+        dueDateText = `Overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) === 1 ? '' : 's'}`;
+      }
     } else if (diffDays === 0) {
       dueDateClass = 'text-orange-600';
       dueDateText = 'Due today';
@@ -68,6 +75,9 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, currentUserId, onTaskUpdated,
       dueDateText = 'Due tomorrow';
     } else if (diffDays <= 3) {
       dueDateClass = 'text-yellow-600';
+      dueDateText = `Due in ${diffDays} days`;
+    } else if (diffDays <= 7) {
+      dueDateClass = 'text-blue-600';
       dueDateText = `Due in ${diffDays} days`;
     } else {
       return null;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Household, User, Expense, Task } from '../types';
+import { Household, User, Expense, Task, HouseholdExpenseSummary } from '../types';
 import { householdAPI, expenseAPI, taskAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
@@ -12,6 +12,9 @@ import HouseholdOptionsModal from '../components/HouseholdOptionsModal';
 import CategoryManagement from '../components/CategoryManagement';
 import TaskList from '../components/TaskList';
 import AddTask from '../components/AddTask';
+import Modal from '../components/Modal';
+import InviteMember from '../components/InviteMember';
+import ExpenseSummary from '../components/ExpenseSummary';
 
 const HouseholdIcon: React.FC<{ name: string; size?: 'small' | 'large' }> = ({
   name,
@@ -106,13 +109,40 @@ const MembersSection: React.FC<{
 const MemberList: React.FC<{
   activeMembers: User[];
   ownerId: number;
-}> = ({ activeMembers, ownerId }) => (
+  isOwner: boolean;
+  onInviteClick: () => void;
+}> = ({ activeMembers, ownerId, isOwner, onInviteClick }) => (
   <div className="mt-4 pt-4 pb-4 border-t border-b border-gray-200">
     <div className="space-y-3">
       {activeMembers.map(member => (
         <MemberListItem key={member.id} member={member} ownerId={ownerId} />
       ))}
     </div>
+    {isOwner && (
+      <div className="mt-2 pt-3 border-gray-100 flex justify-start">
+        <Button
+          variant="outline"
+          size="md"
+          onClick={onInviteClick}
+          className="flex items-center justify-center text-xs px-3"
+        >
+          <svg
+            className="w-3 h-3 mr-1"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+            />
+          </svg>
+          Invite Member
+        </Button>
+      </div>
+    )}
   </div>
 );
 
@@ -123,9 +153,11 @@ const HouseholdDetail: React.FC = () => {
   const [household, setHousehold] = useState<Household | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [expenseSummary, setExpenseSummary] = useState<HouseholdExpenseSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingExpenses, setIsLoadingExpenses] = useState(false);
   const [isLoadingTasks, setIsLoadingTasks] = useState(false);
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'expenses' | 'tasks'>('expenses');
   const [showMembers, setShowMembers] = useState(false);
@@ -133,6 +165,7 @@ const HouseholdDetail: React.FC = () => {
   const [showAddTask, setShowAddTask] = useState(false);
   const [showHouseholdOptions, setShowHouseholdOptions] = useState(false);
   const [showCategoryManagement, setShowCategoryManagement] = useState(false);
+  const [showInviteMember, setShowInviteMember] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -144,6 +177,7 @@ const HouseholdDetail: React.FC = () => {
     if (household) {
       fetchExpenses(household.id);
       fetchTasks(household.id);
+      fetchExpenseSummary(household.id);
     }
   }, [household]);
 
@@ -179,10 +213,23 @@ const HouseholdDetail: React.FC = () => {
     }
   };
 
+  const fetchExpenseSummary = async (householdId: number) => {
+    try {
+      setIsLoadingSummary(true);
+      const summaryData = await expenseAPI.getHouseholdExpenseSummary(householdId);
+      setExpenseSummary(summaryData);
+    } catch (err: any) {
+      console.error('Failed to fetch expense summary:', err);
+    } finally {
+      setIsLoadingSummary(false);
+    }
+  };
+
   const handleExpenseAdded = () => {
     setShowAddExpense(false);
     if (household) {
       fetchExpenses(household.id);
+      fetchExpenseSummary(household.id);
     }
   };
 
@@ -205,6 +252,13 @@ const HouseholdDetail: React.FC = () => {
 
   const handleHouseholdDeleted = () => {
     navigate('/dashboard');
+  };
+
+  const handleInviteMemberSent = () => {
+    setShowInviteMember(false);
+    if (household) {
+      fetchHousehold(household.id);
+    }
   };
 
   if (isLoading) {
@@ -338,7 +392,12 @@ const HouseholdDetail: React.FC = () => {
 
           <div className="hidden sm:block">
             {showMembers && (
-              <MemberList activeMembers={activeMembers} ownerId={household.owner.id} />
+              <MemberList 
+                activeMembers={activeMembers} 
+                ownerId={household.owner.id} 
+                isOwner={isOwner}
+                onInviteClick={() => setShowInviteMember(true)}
+              />
             )}
           </div>
           <div className="sm:hidden">
@@ -358,7 +417,12 @@ const HouseholdDetail: React.FC = () => {
             />
             {showMembers && (
               <div className="mt-6">
-                <MemberList activeMembers={activeMembers} ownerId={household.owner.id} />
+                <MemberList 
+                  activeMembers={activeMembers} 
+                  ownerId={household.owner.id}
+                  isOwner={isOwner}
+                  onInviteClick={() => setShowInviteMember(true)}
+                />
               </div>
             )}
           </div>
@@ -431,6 +495,14 @@ const HouseholdDetail: React.FC = () => {
                 </div>
               </div>
 
+              {/* Expense Summary */}
+              {expenseSummary && (
+                <ExpenseSummary 
+                  summary={expenseSummary} 
+                  isLoading={isLoadingSummary} 
+                />
+              )}
+
               {isLoadingExpenses ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="flex items-center space-x-2 text-gray-600">
@@ -458,7 +530,10 @@ const HouseholdDetail: React.FC = () => {
                   currentUserId={user.id}
                   householdMembers={activeMembers}
                   householdId={household.id}
-                  onExpenseUpdated={() => fetchExpenses(household.id)}
+                  onExpenseUpdated={() => {
+                    fetchExpenses(household.id);
+                    fetchExpenseSummary(household.id);
+                  }}
                 />
               ) : null}
             </>
@@ -588,6 +663,21 @@ const HouseholdDetail: React.FC = () => {
             householdId={household.id}
             isOwner={isOwner}
           />
+        )}
+
+        {/* Invite Member Modal */}
+        {showInviteMember && user && isOwner && (
+          <Modal
+            isOpen={showInviteMember}
+            onClose={() => setShowInviteMember(false)}
+            title="Invite New Member"
+          >
+            <InviteMember
+              householdId={household.id}
+              onInviteSent={handleInviteMemberSent}
+              onCancel={() => setShowInviteMember(false)}
+            />
+          </Modal>
         )}
       </main>
     </div>

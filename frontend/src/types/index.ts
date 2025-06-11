@@ -126,3 +126,22 @@ export interface CreateTaskData {
   household?: number;
   is_completed?: boolean;
 }
+
+export interface ExpenseSummary {
+  total_expenses: number;
+  total_amount_paid: number;
+  total_amount_owed: number;
+  total_amount_settled: number;
+  net_balance: number;
+}
+
+export interface HouseholdExpenseSummary {
+  household_id: number;
+  household_name: string;
+  total_expenses: number;
+  total_amount: number;
+  total_settled: number;
+  total_unsettled: number;
+  user_paid: number;
+  user_owes: number;
+}

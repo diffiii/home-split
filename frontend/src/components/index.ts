@@ -19,3 +19,4 @@ export { default as SplitConfigurationModal } from './SplitConfigurationModal';
 export { default as CategoryManagement } from './CategoryManagement';
 export { default as TaskList } from './TaskList';
 export { default as AddTask } from './AddTask';
+export { default as ExpenseSummary } from './ExpenseSummary';
