@@ -133,19 +133,6 @@ class ExpenseDetailView(generics.RetrieveUpdateDestroyAPIView):
 
         return expense
 
-    def perform_update(self, serializer):
-        """Additional validation for updates."""
-        expense = self.get_object()
-
-        # Only allow author or household owner to update
-        if (self.request.user != expense.author and
-                self.request.user != expense.household.owner):
-            raise PermissionError(
-                'You do not have permission to update this expense.'
-            )
-
-        serializer.save()
-
     def perform_destroy(self, instance):
         """Additional validation for deletion."""
         # Only allow author or household owner to delete
