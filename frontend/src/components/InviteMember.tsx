@@ -9,11 +9,7 @@ interface InviteMemberProps {
   onCancel: () => void;
 }
 
-const InviteMember: React.FC<InviteMemberProps> = ({ 
-  householdId, 
-  onInviteSent, 
-  onCancel 
-}) => {
+const InviteMember: React.FC<InviteMemberProps> = ({ householdId, onInviteSent, onCancel }) => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -54,7 +50,7 @@ const InviteMember: React.FC<InviteMemberProps> = ({
             label="Email Address"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
             placeholder="Enter user's email address"
             required
             disabled={isLoading}
@@ -62,7 +58,7 @@ const InviteMember: React.FC<InviteMemberProps> = ({
         </div>
 
         <div className="flex space-x-3 pt-2">
-          <Button 
+          <Button
             type="submit"
             variant="primary"
             disabled={isLoading || !email.trim()}

@@ -52,14 +52,18 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ user, userId, size = 'md', clas
 
   if (!user && userId && isLoading) {
     return (
-      <div className={`bg-gray-300 rounded-full flex items-center justify-center animate-pulse ${sizeClasses[size]} ${className}`}>
+      <div
+        className={`bg-gray-300 rounded-full flex items-center justify-center animate-pulse ${sizeClasses[size]} ${className}`}
+      >
         <div className="w-full h-full bg-gray-400 rounded-full"></div>
       </div>
     );
   }
 
   return (
-    <div className={`bg-gray-800 rounded-full flex items-center justify-center overflow-hidden ${sizeClasses[size]} ${className}`}>
+    <div
+      className={`bg-gray-800 rounded-full flex items-center justify-center overflow-hidden ${sizeClasses[size]} ${className}`}
+    >
       {currentUser?.profile_picture ? (
         <img
           src={currentUser.profile_picture}

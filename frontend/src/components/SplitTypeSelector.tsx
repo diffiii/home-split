@@ -39,7 +39,12 @@ const SplitTypeSelector: React.FC<SplitTypeSelectorProps> = ({
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <rect x="4" y="3" width="16" height="18" rx="2" strokeWidth={2} />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h8M8 11h5M8 15h3" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8 7h8M8 11h5M8 15h3"
+          />
         </svg>
       )
     },
@@ -59,7 +64,12 @@ const SplitTypeSelector: React.FC<SplitTypeSelectorProps> = ({
       label: 'Plus/Minus',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 3v10m-5-5h10" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2.5}
+            d="M12 3v10m-5-5h10"
+          />
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 17h10" />
         </svg>
       )
@@ -68,11 +78,9 @@ const SplitTypeSelector: React.FC<SplitTypeSelectorProps> = ({
 
   return (
     <div className={`${className}`}>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Split Type
-      </label>
+      <label className="block text-sm font-medium text-gray-700 mb-2">Split Type</label>
       <div className="grid grid-cols-5 gap-2">
-        {splitTypes.map((splitType) => {
+        {splitTypes.map(splitType => {
           const isSelected = value === splitType.type;
           return (
             <button
@@ -81,9 +89,10 @@ const SplitTypeSelector: React.FC<SplitTypeSelectorProps> = ({
               onClick={() => onChange(splitType.type)}
               className={`
                 flex flex-col items-center justify-center p-1.5 rounded-lg border-2 transition-all min-h-[50px]
-                ${isSelected 
-                  ? 'border-black bg-gray-50 text-black' 
-                  : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                ${
+                  isSelected
+                    ? 'border-black bg-gray-50 text-black'
+                    : 'border-gray-200 hover:border-gray-300 text-gray-600'
                 }
               `}
               title={splitType.label}

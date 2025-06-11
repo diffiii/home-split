@@ -33,11 +33,14 @@ const MemberSelectionModal: React.FC<MemberSelectionModalProps> = ({
         return prev.filter(m => m.user_id !== userId);
       } else {
         const user = allMembers.find(u => u.id === userId)!;
-        return [...prev, {
-          user_id: userId,
-          user,
-          value: 0
-        }];
+        return [
+          ...prev,
+          {
+            user_id: userId,
+            user,
+            value: 0
+          }
+        ];
       }
     });
   };
@@ -69,12 +72,14 @@ const MemberSelectionModal: React.FC<MemberSelectionModalProps> = ({
       <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[80vh] flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Select Members</h3>
-          <button 
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -108,7 +113,10 @@ const MemberSelectionModal: React.FC<MemberSelectionModalProps> = ({
             {allMembers.map(user => {
               const isSelected = tempSelectedMembers.some(m => m.user_id === user.id);
               return (
-                <div key={user.id} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors ">
+                <div
+                  key={user.id}
+                  className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors "
+                >
                   <input
                     type="checkbox"
                     checked={isSelected}
@@ -124,12 +132,7 @@ const MemberSelectionModal: React.FC<MemberSelectionModalProps> = ({
         </div>
 
         <div className="flex space-x-3 pt-4 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            className="flex-1"
-          >
+          <Button type="button" variant="outline" onClick={onClose} className="flex-1">
             Cancel
           </Button>
           <Button

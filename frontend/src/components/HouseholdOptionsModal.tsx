@@ -41,16 +41,12 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <div className="flex space-x-3">
           <Button
             onClick={onConfirm}
-            variant={isDestructive ? "danger" : "primary"}
+            variant={isDestructive ? 'danger' : 'primary'}
             className="flex-1"
           >
             {confirmText}
           </Button>
-          <Button
-            onClick={onClose}
-            variant="outline"
-            className="flex-1"
-          >
+          <Button onClick={onClose} variant="outline" className="flex-1">
             Cancel
           </Button>
         </div>
@@ -70,10 +66,10 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
   const [activeTab, setActiveTab] = useState<'name' | 'members' | 'delete'>('name');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const [newName, setNewName] = useState(household.name);
   const [newDescription, setNewDescription] = useState(household.description || '');
-  
+
   const [showRemoveMemberConfirm, setShowRemoveMemberConfirm] = useState<number | null>(null);
   const [showDeleteHouseholdConfirm, setShowDeleteHouseholdConfirm] = useState(false);
 
@@ -108,14 +104,14 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
 
   const handleRemoveMember = async (memberId: number) => {
     const member = activeMembers.find(m => m.id === memberId);
-    
+
     if (!member || !member.membership_id) return;
 
     try {
       setIsLoading(true);
       setError('');
       await membershipAPI.removeMember(member.membership_id);
-      
+
       const updatedMembers = household.members.filter(m => m.id !== memberId);
       const updatedHousehold = { ...household, members: updatedMembers };
 
@@ -132,7 +128,7 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
     if (memberId === household.owner.id) {
       return false;
     }
-    
+
     // TODO: Add expense settlement validation
     return true;
   };
@@ -164,20 +160,20 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
           type="text"
           label="Household Name"
           value={newName}
-          onChange={(e) => setNewName(e.target.value)}
+          onChange={e => setNewName(e.target.value)}
           placeholder="Enter household name"
           disabled={isLoading}
           noMargin={true}
         />
       </div>
-      
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Description (optional)
         </label>
         <textarea
           value={newDescription}
-          onChange={(e) => setNewDescription(e.target.value)}
+          onChange={e => setNewDescription(e.target.value)}
           placeholder="Enter household description"
           disabled={isLoading}
           rows={3}
@@ -185,23 +181,20 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
         />
       </div>
 
-      {error && (
-        <div className="text-red-600 text-sm">{error}</div>
-      )}
+      {error && <div className="text-red-600 text-sm">{error}</div>}
 
       <div className="flex space-x-3">
         <Button
           onClick={handleSaveName}
-          disabled={isLoading || newName === household.name && newDescription === (household.description || '')}
+          disabled={
+            isLoading ||
+            (newName === household.name && newDescription === (household.description || ''))
+          }
           className="flex-1"
         >
           {isLoading ? 'Saving...' : 'Save Changes'}
         </Button>
-        <Button
-          onClick={onClose}
-          variant="outline"
-          className="flex-1"
-        >
+        <Button onClick={onClose} variant="outline" className="flex-1">
           Cancel
         </Button>
       </div>
@@ -211,12 +204,15 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
   const renderMembersTab = () => (
     <div className="space-y-4">
       <div className="space-y-3">
-        {activeMembers.map((member) => {
+        {activeMembers.map(member => {
           const isCurrentUser = member.id === currentUser.id;
           const canRemoveMember = checkCanDeleteMember(member.id);
-          
+
           return (
-            <div key={member.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+            <div
+              key={member.id}
+              className="flex items-center justify-between p-3 border border-gray-200 rounded-lg"
+            >
               <div className="flex items-center space-x-3">
                 <UserAvatar userId={member.id} size="md" />
                 <div>
@@ -231,21 +227,19 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
                   <div className="text-xs text-gray-500">{member.email}</div>
                 </div>
               </div>
-              
+
               {!isCurrentUser && (
                 <div className="flex items-center space-x-2">
-                  {!canRemoveMember && (
-                    <span className="text-xs text-gray-500">Cannot remove</span>
-                  )}
+                  {!canRemoveMember && <span className="text-xs text-gray-500">Cannot remove</span>}
                   <Button
                     onClick={() => setShowRemoveMemberConfirm(member.id)}
                     variant="outline"
                     size="sm"
                     disabled={isLoading || !canRemoveMember}
                     className={`${
-                      canRemoveMember 
-                        ? "text-red-600 border-red-300 hover:bg-red-50" 
-                        : "text-gray-400 border-gray-300 cursor-not-allowed"
+                      canRemoveMember
+                        ? 'text-red-600 border-red-300 hover:bg-red-500'
+                        : 'text-gray-400 border-gray-300 cursor-not-allowed'
                     }`}
                   >
                     Remove
@@ -257,9 +251,7 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
         })}
       </div>
 
-      {error && (
-        <div className="text-red-600 text-sm">{error}</div>
-      )}
+      {error && <div className="text-red-600 text-sm">{error}</div>}
 
       <div className="pt-2 border-t border-gray-200">
         <p className="text-xs text-gray-500">
@@ -273,13 +265,24 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
     <div className="space-y-4">
       <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
         <div className="flex items-start space-x-3">
-          <svg className="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          <svg
+            className="w-5 h-5 text-red-600 mt-0.5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"
+            />
           </svg>
           <div>
             <h4 className="text-sm font-medium text-red-800">Delete Household</h4>
             <p className="text-sm text-red-700 mt-1">
-              This will permanently delete the household and all associated data. This action cannot be undone.
+              This will permanently delete the household and all associated data. This action cannot
+              be undone.
             </p>
           </div>
         </div>
@@ -294,9 +297,7 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
         </ul>
       </div>
 
-      {error && (
-        <div className="text-red-600 text-sm">{error}</div>
-      )}
+      {error && <div className="text-red-600 text-sm">{error}</div>}
 
       <Button
         onClick={() => setShowDeleteHouseholdConfirm(true)}

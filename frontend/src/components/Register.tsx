@@ -15,7 +15,7 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin, onRegisterSuccess 
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { register } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,7 +33,11 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin, onRegisterSuccess 
       await register({ email, username, password });
       onRegisterSuccess?.();
     } catch (err: any) {
-      setError(err.response?.data?.email?.[0] || err.response?.data?.password?.[0] || 'Registration failed. Please try again.');
+      setError(
+        err.response?.data?.email?.[0] ||
+          err.response?.data?.password?.[0] ||
+          'Registration failed. Please try again.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -52,7 +56,7 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin, onRegisterSuccess 
           label="Email"
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={e => setEmail(e.target.value)}
           placeholder="Enter your email"
           required
         />
@@ -61,7 +65,7 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin, onRegisterSuccess 
           label="Username"
           type="text"
           value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={e => setUsername(e.target.value)}
           placeholder="Enter your username"
           required
         />
@@ -70,7 +74,7 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin, onRegisterSuccess 
           label="Password"
           type="password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={e => setPassword(e.target.value)}
           placeholder="Enter your password"
           required
         />
@@ -79,17 +83,12 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin, onRegisterSuccess 
           label="Confirm Password"
           type="password"
           value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
+          onChange={e => setConfirmPassword(e.target.value)}
           placeholder="Confirm your password"
           required
         />
 
-        <Button
-          type="submit"
-          disabled={isLoading}
-          variant="primary"
-          className="w-full mb-4"
-        >
+        <Button type="submit" disabled={isLoading} variant="primary" className="w-full mb-4">
           {isLoading ? 'Creating account...' : 'Sign Up'}
         </Button>
       </form>

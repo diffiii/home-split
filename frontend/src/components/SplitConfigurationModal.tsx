@@ -22,34 +22,37 @@ const SplitConfigurationModal: React.FC<SplitConfigurationModalProps> = ({
   totalAmount
 }) => {
   const [localMembers, setLocalMembers] = useState<SplitMember[]>(members);
-  const [inputValuesBySplitType, setInputValuesBySplitType] = useState<{[splitType: string]: {[userId: number]: string}}>({});
+  const [inputValuesBySplitType, setInputValuesBySplitType] = useState<{
+    [splitType: string]: { [userId: number]: string };
+  }>({});
 
   useEffect(() => {
     setLocalMembers(members);
-    
+
     if (!inputValuesBySplitType[splitType]) {
-      const initialInputValues: {[key: number]: string} = {};
+      const initialInputValues: { [key: number]: string } = {};
       members.forEach(member => {
-        initialInputValues[member.user_id] = member.value !== undefined && member.value !== null ? member.value.toString() : '';
+        initialInputValues[member.user_id] =
+          member.value !== undefined && member.value !== null ? member.value.toString() : '';
       });
-      
+
       setInputValuesBySplitType(prev => ({
         ...prev,
         [splitType]: initialInputValues
       }));
     } else {
-        const storedInputs = inputValuesBySplitType[splitType];
-        const updatedMembers = members.map(member => {
-            const storedValue = storedInputs[member.user_id];
-            if (storedValue !== undefined && storedValue !== '') {
-                const numericValue = parseFloat(storedValue);
-                if (!isNaN(numericValue)) {
-                    return { ...member, value: numericValue };
-                }
-            }
-            return member;
-        });
-        setLocalMembers(updatedMembers);
+      const storedInputs = inputValuesBySplitType[splitType];
+      const updatedMembers = members.map(member => {
+        const storedValue = storedInputs[member.user_id];
+        if (storedValue !== undefined && storedValue !== '') {
+          const numericValue = parseFloat(storedValue);
+          if (!isNaN(numericValue)) {
+            return { ...member, value: numericValue };
+          }
+        }
+        return member;
+      });
+      setLocalMembers(updatedMembers);
     }
   }, [members, isOpen, splitType, inputValuesBySplitType]);
 
@@ -76,12 +79,8 @@ const SplitConfigurationModal: React.FC<SplitConfigurationModalProps> = ({
       }
     }
 
-    setLocalMembers(prev => 
-      prev.map(member => 
-        member.user_id === userId 
-          ? { ...member, value: numericValue }
-          : member
-      )
+    setLocalMembers(prev =>
+      prev.map(member => (member.user_id === userId ? { ...member, value: numericValue } : member))
     );
   };
 
@@ -110,41 +109,61 @@ const SplitConfigurationModal: React.FC<SplitConfigurationModalProps> = ({
 
   const getInputLabel = (splitType: SplitType): string => {
     switch (splitType) {
-      case 'percentage': return '%';
-      case 'fixed': return '$';
-      case 'parts': return 'parts';
-      case 'plus_minus': return '$';
-      default: return '';
+      case 'percentage':
+        return '%';
+      case 'fixed':
+        return '$';
+      case 'parts':
+        return 'parts';
+      case 'plus_minus':
+        return '$';
+      default:
+        return '';
     }
   };
 
   const getPlaceholder = (splitType: SplitType): string => {
     switch (splitType) {
-      case 'percentage': return '0';
-      case 'fixed': return '0.00';
-      case 'parts': return '0';
-      case 'plus_minus': return '0.00';
-      default: return '0';
+      case 'percentage':
+        return '0';
+      case 'fixed':
+        return '0.00';
+      case 'parts':
+        return '0';
+      case 'plus_minus':
+        return '0.00';
+      default:
+        return '0';
     }
   };
 
   const getModalTitle = (splitType: SplitType): string => {
     switch (splitType) {
-      case 'percentage': return 'Set Percentage Split';
-      case 'fixed': return 'Set Fixed Amount Split';
-      case 'parts': return 'Set Parts Split';
-      case 'plus_minus': return 'Set Plus/Minus Split';
-      default: return 'Configure Split';
+      case 'percentage':
+        return 'Set Percentage Split';
+      case 'fixed':
+        return 'Set Fixed Amount Split';
+      case 'parts':
+        return 'Set Parts Split';
+      case 'plus_minus':
+        return 'Set Plus/Minus Split';
+      default:
+        return 'Configure Split';
     }
   };
 
   const getDescription = (splitType: SplitType): string => {
     switch (splitType) {
-      case 'percentage': return 'Enter the percentage each member should pay:';
-      case 'fixed': return 'Enter the fixed amount each member should pay:';
-      case 'parts': return 'Enter the number of parts for each member:';
-      case 'plus_minus': return 'Enter adjustment amounts (+ to pay more, - to pay less):';
-      default: return '';
+      case 'percentage':
+        return 'Enter the percentage each member should pay:';
+      case 'fixed':
+        return 'Enter the fixed amount each member should pay:';
+      case 'parts':
+        return 'Enter the number of parts for each member:';
+      case 'plus_minus':
+        return 'Enter adjustment amounts (+ to pay more, - to pay less):';
+      default:
+        return '';
     }
   };
 
@@ -153,12 +172,14 @@ const SplitConfigurationModal: React.FC<SplitConfigurationModalProps> = ({
       <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-900">{getModalTitle(splitType)}</h2>
-          <button 
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -181,23 +202,27 @@ const SplitConfigurationModal: React.FC<SplitConfigurationModalProps> = ({
                 <UserAvatar userId={member.user_id} size="sm" />
                 <span className="text-sm flex-1">{member.user.username}</span>
                 <div className="flex items-center space-x-2">
-                    <input
-                        type="text"
-                        inputMode='decimal'
-                        pattern={splitType === 'percentage' ? '[0-9]*' : '[0-9]*(\.[0-9]+)?'}
-                        step={splitType === 'parts' ? '1' : '0.01'}
-                        min={splitType === 'percentage' ? '0' : undefined}
-                        max={splitType === 'percentage' ? '100' : undefined}                    
-                        value={(inputValuesBySplitType[splitType] && inputValuesBySplitType[splitType][member.user_id]) || ''}
-                        onChange={(e) => {
-                            handleValueChange(member.user_id, e.target.value);
-                        }}
-                        placeholder={getPlaceholder(splitType)}
-                        className="w-20 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-black focus:border-black text-right"
-                    />
-                    <span className="text-sm text-gray-500 min-w-fit">
-                        {getInputLabel(splitType)}
-                    </span>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    pattern={splitType === 'percentage' ? '[0-9]*' : '[0-9]*(\.[0-9]+)?'}
+                    step={splitType === 'parts' ? '1' : '0.01'}
+                    min={splitType === 'percentage' ? '0' : undefined}
+                    max={splitType === 'percentage' ? '100' : undefined}
+                    value={
+                      (inputValuesBySplitType[splitType] &&
+                        inputValuesBySplitType[splitType][member.user_id]) ||
+                      ''
+                    }
+                    onChange={e => {
+                      handleValueChange(member.user_id, e.target.value);
+                    }}
+                    placeholder={getPlaceholder(splitType)}
+                    className="w-20 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-black focus:border-black text-right"
+                  />
+                  <span className="text-sm text-gray-500 min-w-fit">
+                    {getInputLabel(splitType)}
+                  </span>
                 </div>
               </div>
             ))}
@@ -210,7 +235,9 @@ const SplitConfigurationModal: React.FC<SplitConfigurationModalProps> = ({
             {splitType === 'percentage' && (
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Total Percentage:</span>
-                <span className={`font-medium ${validation.isValid ? 'text-green-600' : 'text-red-600'}`}>
+                <span
+                  className={`font-medium ${validation.isValid ? 'text-green-600' : 'text-red-600'}`}
+                >
                   {localMembers.reduce((sum, member) => sum + (member.value || 0), 0).toFixed(1)}%
                 </span>
               </div>
@@ -236,7 +263,10 @@ const SplitConfigurationModal: React.FC<SplitConfigurationModalProps> = ({
                 <span className="text-gray-600">Total Adjustments:</span>
                 <span className="font-medium text-blue-600">
                   {(() => {
-                    const total = localMembers.reduce((sum, member) => sum + (member.value || 0), 0);
+                    const total = localMembers.reduce(
+                      (sum, member) => sum + (member.value || 0),
+                      0
+                    );
                     return `${total >= 0 ? '+' : ''}$${total.toFixed(2)}`;
                   })()}
                 </span>
@@ -256,12 +286,7 @@ const SplitConfigurationModal: React.FC<SplitConfigurationModalProps> = ({
 
         {/* Action Buttons */}
         <div className="flex space-x-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            className="flex-1"
-          >
+          <Button type="button" variant="outline" onClick={onClose} className="flex-1">
             Cancel
           </Button>
           <Button

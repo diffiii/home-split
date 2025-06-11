@@ -59,7 +59,7 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({
         {label}
         {required && <span className="text-black ml-1">*</span>}
       </label>
-      
+
       <div
         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 cursor-pointer bg-white flex items-center justify-between min-h-[40px]"
         onClick={() => setIsOpen(!isOpen)}
@@ -67,19 +67,17 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({
         <div className="flex items-center space-x-2 flex-1">
           {selectedCategory ? (
             <>
-              {selectedCategory.icon && (
-                <span className="text-lg">{selectedCategory.icon}</span>
-              )}
+              {selectedCategory.icon && <span className="text-lg">{selectedCategory.icon}</span>}
               <span className="text-gray-900">{selectedCategory.name}</span>
             </>
           ) : (
             <span className="text-gray-500">{placeholder}</span>
           )}
         </div>
-        <svg 
+        <svg
           className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          fill="none" 
-          stroke="currentColor" 
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -93,23 +91,21 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({
               type="text"
               placeholder="Search categories..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-              onClick={(e) => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
             />
           </div>
-          
+
           <div className="max-h-48 overflow-y-auto">
             {filteredCategories.length > 0 ? (
-              filteredCategories.map((category) => (
+              filteredCategories.map(category => (
                 <div
                   key={category.id}
                   className="flex items-center space-x-3 px-3 py-2 hover:bg-gray-50 cursor-pointer"
                   onClick={() => handleSelect(category.id)}
                 >
-                  {category.icon && (
-                    <span className="text-lg">{category.icon}</span>
-                  )}
+                  {category.icon && <span className="text-lg">{category.icon}</span>}
                   <span className="text-gray-900">{category.name}</span>
                 </div>
               ))
@@ -164,7 +160,7 @@ export const UserSelect: React.FC<UserSelectProps> = ({
         {label}
         {required && <span className="text-black ml-1">*</span>}
       </label>
-      
+
       <div
         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 cursor-pointer bg-white flex items-center justify-between min-h-[40px]"
         onClick={() => setIsOpen(!isOpen)}
@@ -179,10 +175,10 @@ export const UserSelect: React.FC<UserSelectProps> = ({
             <span className="text-gray-500">{placeholder}</span>
           )}
         </div>
-        <svg 
+        <svg
           className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          fill="none" 
-          stroke="currentColor" 
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -196,21 +192,20 @@ export const UserSelect: React.FC<UserSelectProps> = ({
               type="text"
               placeholder="Search users..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="w-full px-2 py-1 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-              onClick={(e) => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
             />
           </div>
-          
+
           <div className="max-h-48 overflow-y-auto">
             {filteredUsers.length > 0 ? (
-              filteredUsers.map((user) => (
+              filteredUsers.map(user => (
                 <div
                   key={user.id}
                   className="flex items-center space-x-3 px-3 py-2 hover:bg-gray-50 cursor-pointer"
                   onClick={() => handleSelect(user.id)}
                 >
-                    
                   <UserAvatar userId={user.id} size="sm" />
                   <span className="text-gray-900">{user.username}</span>
                 </div>

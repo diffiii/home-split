@@ -25,8 +25,8 @@ const RegisterPage: React.FC = () => {
               <h2 className="text-3xl font-light text-black mb-2">Join HomeSplit</h2>
               <p className="text-gray-600">Create your account and start managing your household</p>
             </div>
-            
-            <Register 
+
+            <Register
               onSwitchToLogin={handleSwitchToLogin}
               onRegisterSuccess={handleRegisterSuccess}
             />

@@ -25,15 +25,18 @@ const LoginPage: React.FC = () => {
               <h2 className="text-3xl font-light text-black mb-2">Welcome Back</h2>
               <p className="text-gray-600">Sign in to your HomeSplit account</p>
             </div>
-            
-            <Login 
+
+            <Login
               onSwitchToRegister={handleSwitchToRegister}
               onLoginSuccess={handleLoginSuccess}
             />
 
             <div className="mt-8 text-center">
               <span className="text-gray-600">Don't have an account? </span>
-              <Link to="/register" className="text-black hover:underline font-medium transition-all">
+              <Link
+                to="/register"
+                className="text-black hover:underline font-medium transition-all"
+              >
                 Create one here
               </Link>
             </div>

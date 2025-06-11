@@ -9,25 +9,26 @@ const distributeRemainder = (baseCents: number[], remainderCents: number): numbe
   const randomIndices = [...Array(baseCents.length).keys()]
     .sort(() => Math.random() - 0.5)
     .slice(0, remainderCents);
-  
-  return baseCents.map((cents, index) => 
-    cents + (randomIndices.includes(index) ? 1 : 0)
-  );
+
+  return baseCents.map((cents, index) => cents + (randomIndices.includes(index) ? 1 : 0));
 };
 
-export const calculateSplitsForAPI = (config: SplitConfiguration, totalAmount: number): SplitResult[] => {
+export const calculateSplitsForAPI = (
+  config: SplitConfiguration,
+  totalAmount: number
+): SplitResult[] => {
   const splits: { [userId: number]: number } = {};
   const totalCents = Math.round(totalAmount * 100);
-  
+
   switch (config.type) {
     case 'equal': {
       const baseCents = Math.floor(totalCents / config.members.length);
-      const remainder = totalCents - (baseCents * config.members.length);
+      const remainder = totalCents - baseCents * config.members.length;
       const memberCents = distributeRemainder(
-        Array(config.members.length).fill(baseCents), 
+        Array(config.members.length).fill(baseCents),
         remainder
       );
-      
+
       config.members.forEach((member, index) => {
         splits[member.user_id] = memberCents[index] / 100;
       });
@@ -35,13 +36,13 @@ export const calculateSplitsForAPI = (config: SplitConfiguration, totalAmount: n
     }
 
     case 'percentage': {
-      const baseCents = config.members.map(member => 
+      const baseCents = config.members.map(member =>
         Math.floor((totalCents * (member.value || 0)) / 100)
       );
       const allocated = baseCents.reduce((sum, cents) => sum + cents, 0);
       const remainder = totalCents - allocated;
       const memberCents = distributeRemainder(baseCents, remainder);
-      
+
       config.members.forEach((member, index) => {
         splits[member.user_id] = memberCents[index] / 100;
       });
@@ -57,19 +58,19 @@ export const calculateSplitsForAPI = (config: SplitConfiguration, totalAmount: n
     case 'parts': {
       const totalParts = config.members.reduce((sum, member) => sum + (member.value || 0), 0);
       if (totalParts === 0) break;
-      
+
       let allocated = 0;
       const memberCents = config.members.map(member => {
         const cents = Math.floor((totalCents * (member.value || 0)) / totalParts);
         allocated += cents;
         return cents;
       });
-      
+
       const remainder = totalCents - allocated;
       if (memberCents.length > 0) {
         memberCents[memberCents.length - 1] += remainder;
       }
-      
+
       config.members.forEach((member, index) => {
         splits[member.user_id] = memberCents[index] / 100;
       });
@@ -81,13 +82,13 @@ export const calculateSplitsForAPI = (config: SplitConfiguration, totalAmount: n
       const adjustmentCents = Math.round(totalAdjustments * 100);
       const remainingCents = totalCents - adjustmentCents;
       const baseCents = Math.floor(remainingCents / config.members.length);
-      const remainder = remainingCents - (baseCents * config.members.length);
-      
+      const remainder = remainingCents - baseCents * config.members.length;
+
       const equalCents = distributeRemainder(
-        Array(config.members.length).fill(baseCents), 
+        Array(config.members.length).fill(baseCents),
         remainder
       );
-      
+
       config.members.forEach((member, index) => {
         const adjustmentCents = Math.round((member.value || 0) * 100);
         splits[member.user_id] = (equalCents[index] + adjustmentCents) / 100;
@@ -104,7 +105,7 @@ export const calculateSplitsForAPI = (config: SplitConfiguration, totalAmount: n
     }));
 };
 
-const hasNegativeValues = (members: SplitMember[]): boolean => 
+const hasNegativeValues = (members: SplitMember[]): boolean =>
   members.some(member => (member.value || 0) < 0);
 
 const getTotalValue = (members: SplitMember[]): number =>
@@ -124,8 +125,8 @@ export const validateSplitConfiguration = (config: SplitConfiguration, totalAmou
     return validations;
   }
 
-  const hasEmptyValues = config.members.some(member => 
-    member.value === undefined || member.value === null || isNaN(member.value)
+  const hasEmptyValues = config.members.some(
+    member => member.value === undefined || member.value === null || isNaN(member.value)
   );
 
   if (hasEmptyValues) {
@@ -138,42 +139,46 @@ export const validateSplitConfiguration = (config: SplitConfiguration, totalAmou
   switch (config.type) {
     case 'percentage': {
       const totalPercentage = getTotalValue(config.members);
-      
+
       if (hasNegativeValues(config.members)) {
         validations.isValid = false;
         validations.errors.push('Percentages cannot be negative');
       }
-      
+
       if (Math.abs(totalPercentage - 100) > 0.01) {
         validations.isValid = false;
-        validations.errors.push(`Percentages must add up to 100% (currently ${totalPercentage.toFixed(1)}%)`);
+        validations.errors.push(
+          `Percentages must add up to 100% (currently ${totalPercentage.toFixed(1)}%)`
+        );
       }
       break;
     }
 
     case 'fixed': {
       const totalFixed = getTotalValue(config.members);
-      
+
       if (hasNegativeValues(config.members)) {
         validations.isValid = false;
         validations.errors.push('Fixed amounts cannot be negative');
       }
-      
+
       if (Math.abs(totalFixed - totalAmount) >= 0.009) {
         validations.isValid = false;
-        validations.errors.push(`Fixed amounts ($${totalFixed.toFixed(2)}) don't match expense total ($${totalAmount.toFixed(2)}).`);
+        validations.errors.push(
+          `Fixed amounts ($${totalFixed.toFixed(2)}) don't match expense total ($${totalAmount.toFixed(2)}).`
+        );
       }
       break;
     }
 
     case 'parts': {
       const totalParts = getTotalValue(config.members);
-      
+
       if (hasNegativeValues(config.members)) {
         validations.isValid = false;
         validations.errors.push('Parts cannot be negative');
       }
-      
+
       if (totalParts === 0) {
         validations.isValid = false;
         validations.errors.push('Total parts must be greater than 0');
@@ -183,10 +188,12 @@ export const validateSplitConfiguration = (config: SplitConfiguration, totalAmou
 
     case 'plus_minus': {
       const totalAdjustments = getTotalValue(config.members);
-      
+
       if (Math.abs(totalAdjustments) > totalAmount) {
         validations.isValid = false;
-        validations.errors.push(`Total adjustments ($${totalAdjustments.toFixed(2)}) exceed expense total ($${totalAmount.toFixed(2)}).`);
+        validations.errors.push(
+          `Total adjustments ($${totalAdjustments.toFixed(2)}) exceed expense total ($${totalAmount.toFixed(2)}).`
+        );
       }
       break;
     }

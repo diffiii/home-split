@@ -66,7 +66,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
     try {
       const updateData: any = {
         username,
-        email,
+        email
       };
 
       if (showPasswordChange && newPassword) {
@@ -76,36 +76,41 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
 
       const updatedUser = await userAPI.updateProfile(updateData);
       updateUser(updatedUser);
-      setSuccess(showPasswordChange ? 'Profile and password updated successfully!' : 'Profile updated successfully!');
-      
+      setSuccess(
+        showPasswordChange
+          ? 'Profile and password updated successfully!'
+          : 'Profile updated successfully!'
+      );
+
       if (showPasswordChange) {
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
         setShowPasswordChange(false);
       }
-      
+
       setTimeout(() => {
         onClose();
         setSuccess('');
       }, 1500);
-
     } catch (err: any) {
       console.error('Profile update error:', err);
-      
+
       const capitalizeFirstLetter = (str: string) => {
         return str.charAt(0).toUpperCase() + str.slice(1);
-      }
+      };
 
-      setError(capitalizeFirstLetter(
-        err.response?.data?.current_password?.[0] ||
-        err.response?.data?.password?.[0] ||
-        err.response?.data?.email?.[0] ||
-        err.response?.data?.username?.[0] ||
-        err.response?.data?.detail ||
-        err.response?.data?.non_field_errors?.[0] ||
-        'Profile update failed. Please try again.'
-      ));
+      setError(
+        capitalizeFirstLetter(
+          err.response?.data?.current_password?.[0] ||
+            err.response?.data?.password?.[0] ||
+            err.response?.data?.email?.[0] ||
+            err.response?.data?.username?.[0] ||
+            err.response?.data?.detail ||
+            err.response?.data?.non_field_errors?.[0] ||
+            'Profile update failed. Please try again.'
+        )
+      );
     } finally {
       setIsLoading(false);
     }
@@ -124,8 +129,8 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
       console.error('Profile picture upload error:', err);
       setError(
         err.response?.data?.profile_picture?.[0] ||
-        err.response?.data?.detail ||
-        'Failed to upload profile picture. Please try again.'
+          err.response?.data?.detail ||
+          'Failed to upload profile picture. Please try again.'
       );
     } finally {
       setIsPictureLoading(false);
@@ -143,10 +148,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
       setSuccess('Profile picture removed successfully!');
     } catch (err: any) {
       console.error('Profile picture removal error:', err);
-      setError(
-        err.response?.data?.detail ||
-        'Failed to remove profile picture. Please try again.'
-      );
+      setError(err.response?.data?.detail || 'Failed to remove profile picture. Please try again.');
     } finally {
       setIsPictureLoading(false);
     }
@@ -173,7 +175,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
             {error}
           </div>
         )}
-        
+
         {success && (
           <div className="bg-green-500/20 border border-green-500/30 text-green-800 px-4 py-3 rounded-xl backdrop-blur-sm">
             {success}
@@ -194,23 +196,23 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
           {/* Profile Information */}
           <div>
             <div className="space-y-4">
-            <Input
-              label="Username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              placeholder="Enter your username"
-            />
+              <Input
+                label="Username"
+                type="text"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                required
+                placeholder="Enter your username"
+              />
 
-            <Input
-              label="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="Enter your email"
-            />
+              <Input
+                label="Email"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                placeholder="Enter your email"
+              />
             </div>
           </div>
 
@@ -226,32 +228,32 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
                 {showPasswordChange ? 'Cancel' : 'Change Password'}
               </Button>
             </div>
-            
+
             {showPasswordChange && (
               <div className="space-y-4">
                 <Input
                   label="Current Password"
                   type="password"
                   value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  onChange={e => setCurrentPassword(e.target.value)}
                   required
                   placeholder="Enter your current password"
                 />
-                
+
                 <Input
                   label="New Password"
                   type="password"
                   value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
+                  onChange={e => setNewPassword(e.target.value)}
                   required
                   placeholder="Enter new password (min 8 characters)"
                 />
-                
+
                 <Input
                   label="Confirm New Password"
                   type="password"
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={e => setConfirmPassword(e.target.value)}
                   required
                   placeholder="Confirm new password"
                 />
@@ -261,20 +263,15 @@ const UserProfile: React.FC<UserProfileProps> = ({ isOpen, onClose }) => {
         </div>
 
         <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleClose}
-            disabled={isLoading}
-          >
+          <Button type="button" variant="secondary" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Saving...' : showPasswordChange ? 'Save Changes & Update Password' : 'Save Changes'}
+          <Button type="submit" variant="primary" disabled={isLoading}>
+            {isLoading
+              ? 'Saving...'
+              : showPasswordChange
+                ? 'Save Changes & Update Password'
+                : 'Save Changes'}
           </Button>
         </div>
       </form>

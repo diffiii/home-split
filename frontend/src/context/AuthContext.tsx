@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           sessionStorage.removeItem('refresh_token');
         }
       }
-      
+
       setIsLoading(false);
     };
 
@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const tokens = await authAPI.login(credentials);
     sessionStorage.setItem('access_token', tokens.access);
     sessionStorage.setItem('refresh_token', tokens.refresh);
-    
+
     const userData = await authAPI.getCurrentUser();
     setUser(userData);
   };
@@ -83,7 +83,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     logout,
     updateUser,
-    isAuthenticated: !!user,
+    isAuthenticated: !!user
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

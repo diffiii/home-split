@@ -9,11 +9,7 @@ interface InvitationCardProps {
   onDecline: (membershipId: number) => void;
 }
 
-const InvitationCard: React.FC<InvitationCardProps> = ({ 
-  invitation, 
-  onAccept, 
-  onDecline 
-}) => {
+const InvitationCard: React.FC<InvitationCardProps> = ({ invitation, onAccept, onDecline }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAccept = async () => {
@@ -57,29 +53,41 @@ const InvitationCard: React.FC<InvitationCardProps> = ({
               Invited by {invitation.household?.owner?.username || 'Unknown User'}
             </p>
             {invitation.household?.description && (
-              <p className="text-xs sm:text-sm text-gray-500 mt-1 overflow-hidden" 
-                 style={{
-                   display: '-webkit-box',
-                   WebkitLineClamp: 2,
-                   WebkitBoxOrient: 'vertical',
-                   lineHeight: '1.3em',
-                   maxHeight: '2.6em'
-                 }}>
+              <p
+                className="text-xs sm:text-sm text-gray-500 mt-1 overflow-hidden"
+                style={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  lineHeight: '1.3em',
+                  maxHeight: '2.6em'
+                }}
+              >
                 {invitation.household.description}
               </p>
             )}
           </div>
         </div>
-        
+
         <div className="flex items-center ml-2 flex-shrink-0">
-          <svg className="w-5 h-5 sm:w-6 sm:h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          <svg
+            className="w-5 h-5 sm:w-6 sm:h-6 text-black"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+            />
           </svg>
         </div>
       </div>
 
       <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:gap-3">
-        <Button 
+        <Button
           onClick={handleAccept}
           variant="primary"
           size="sm"
@@ -88,7 +96,7 @@ const InvitationCard: React.FC<InvitationCardProps> = ({
         >
           {isLoading ? 'Processing...' : 'Accept'}
         </Button>
-        <Button 
+        <Button
           onClick={handleDecline}
           variant="outline"
           size="sm"

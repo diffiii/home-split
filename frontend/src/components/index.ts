@@ -16,3 +16,4 @@ export { default as ProfilePictureUpload } from './ProfilePictureUpload';
 export { default as ExpenseList } from './ExpenseList';
 export { default as AddExpense } from './AddExpense';
 export { default as SplitConfigurationModal } from './SplitConfigurationModal';
+export { default as CategoryManagement } from './CategoryManagement';

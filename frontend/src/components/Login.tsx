@@ -13,7 +13,7 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onLoginSuccess }) => 
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,7 +44,7 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onLoginSuccess }) => 
           label="Email"
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={e => setEmail(e.target.value)}
           placeholder="Enter your email"
           required
         />
@@ -53,17 +53,12 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onLoginSuccess }) => 
           label="Password"
           type="password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={e => setPassword(e.target.value)}
           placeholder="Enter your password"
           required
         />
 
-        <Button
-          type="submit"
-          disabled={isLoading}
-          variant="primary"
-          className="w-full mb-4"
-        >
+        <Button type="submit" disabled={isLoading} variant="primary" className="w-full mb-4">
           {isLoading ? 'Signing in...' : 'Sign In'}
         </Button>
       </form>

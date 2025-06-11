@@ -1,28 +1,39 @@
 import axios from 'axios';
-import { AuthTokens, LoginCredentials, RegisterData, User, Household, Membership, RawMembership, Expense, CreateExpenseData, ExpenseCategory } from '../types';
+import {
+  AuthTokens,
+  LoginCredentials,
+  RegisterData,
+  User,
+  Household,
+  Membership,
+  RawMembership,
+  Expense,
+  CreateExpenseData,
+  ExpenseCategory
+} from '../types';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
-  },
+    'Content-Type': 'application/json'
+  }
 });
 
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(config => {
   const token = sessionStorage.getItem('access_token');
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  
+
   return config;
 });
 
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -32,7 +43,7 @@ api.interceptors.response.use(
 
         if (refreshToken) {
           const response = await axios.post(`${API_BASE_URL}/auth/token/refresh/`, {
-            refresh: refreshToken,
+            refresh: refreshToken
           });
           const { access } = response.data;
           sessionStorage.setItem('access_token', access);
@@ -40,7 +51,6 @@ api.interceptors.response.use(
 
           return api(originalRequest);
         }
-
       } catch (refreshError) {
         sessionStorage.removeItem('access_token');
         sessionStorage.removeItem('refresh_token');
@@ -66,7 +76,7 @@ export const authAPI = {
   getCurrentUser: async (): Promise<User> => {
     const response = await api.get('/users/detail/');
     return response.data;
-  },
+  }
 };
 
 export const userAPI = {
@@ -80,7 +90,9 @@ export const userAPI = {
     }
   },
 
-  updateProfile: async (data: Partial<User & { current_password?: string; password?: string }>): Promise<User> => {
+  updateProfile: async (
+    data: Partial<User & { current_password?: string; password?: string }>
+  ): Promise<User> => {
     const response = await api.patch('/users/detail/', data);
     return response.data;
   },
@@ -88,18 +100,18 @@ export const userAPI = {
   uploadProfilePicture: async (file: File): Promise<User> => {
     const formData = new FormData();
     formData.append('profile_picture', file);
-    
+
     const response = await api.patch('/users/detail/', formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+        'Content-Type': 'multipart/form-data'
+      }
     });
     return response.data;
   },
 
   removeProfilePicture: async (): Promise<User> => {
     const response = await api.patch('/users/detail/', {
-      profile_picture: null,
+      profile_picture: null
     });
     return response.data;
   },
@@ -109,13 +121,13 @@ export const userAPI = {
       const user = await authAPI.getCurrentUser();
       const response = await api.post('/auth/token/', {
         email: user.email,
-        password: currentPassword,
+        password: currentPassword
       });
       return !!response.data.access;
     } catch (error) {
       return false;
     }
-  },
+  }
 };
 
 export const householdAPI = {
@@ -134,14 +146,17 @@ export const householdAPI = {
     return response.data;
   },
 
-  updateHousehold: async (id: number, data: { name?: string; description?: string }): Promise<Household> => {
+  updateHousehold: async (
+    id: number,
+    data: { name?: string; description?: string }
+  ): Promise<Household> => {
     const response = await api.patch(`/households/${id}/`, data);
     return response.data;
   },
 
   deleteHousehold: async (id: number): Promise<void> => {
     await api.delete(`/households/${id}/`);
-  },
+  }
 };
 
 export const membershipAPI = {
@@ -153,13 +168,13 @@ export const membershipAPI = {
   inviteUser: async (householdId: number, userEmail: string): Promise<RawMembership> => {
     const userResponse = await api.get('/users/');
     const users = userResponse.data;
-    
+
     const user = users.find((u: User) => u.email.toLowerCase() === userEmail.toLowerCase());
-    
+
     if (!user) {
       throw new Error('User not found');
     }
-    
+
     const response = await api.post('/memberships/', {
       user: user.id,
       household: householdId,
@@ -182,14 +197,14 @@ export const membershipAPI = {
 
   removeMember: async (membershipId: number): Promise<void> => {
     await api.delete(`/memberships/${membershipId}/`);
-  },
+  }
 };
 
 export const expenseAPI = {
   getExpenses: async (householdId: number): Promise<Expense[]> => {
     const response = await api.get(`/expenses/?household_id=${householdId}`);
     const expenses = response.data;
-    
+
     const expensesWithSplits = await Promise.all(
       expenses.map(async (expense: Expense) => {
         try {
@@ -200,7 +215,7 @@ export const expenseAPI = {
         }
       })
     );
-    
+
     return expensesWithSplits;
   },
 
@@ -209,15 +224,31 @@ export const expenseAPI = {
     return response.data;
   },
 
+  updateExpense: async (
+    expenseId: number,
+    data: { category_id?: number | null }
+  ): Promise<Expense> => {
+    const response = await api.patch(`/expenses/${expenseId}/`, data);
+    return response.data;
+  },
+
   getHouseholdCategories: async (householdId: number): Promise<ExpenseCategory[]> => {
     const response = await api.get(`/households/${householdId}/categories/`);
     return response.data;
   },
 
-  createExpenseCategory: async (data: { household_id: number; name: string; icon: string }): Promise<ExpenseCategory> => {
+  createExpenseCategory: async (data: {
+    household_id: number;
+    name: string;
+    icon: string;
+  }): Promise<ExpenseCategory> => {
     const response = await api.post('/categories/', data);
     return response.data;
   },
+
+  deleteExpenseCategory: async (categoryId: number): Promise<void> => {
+    await api.delete(`/categories/${categoryId}/`);
+  }
 };
 
 export default api;
