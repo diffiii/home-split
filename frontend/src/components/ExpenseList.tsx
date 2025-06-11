@@ -257,6 +257,10 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({
   // Calculate what others owe the current user
   const othersOweAmount = isPayer ? totalAmount - currentUserAmount : 0;
 
+  if (expense.name === "<<<SETTLEMENT ADJUSTMENT>>>") {
+    return null;
+  }
+
   return (
     <div
       className="border-b border-gray-200 py-4  cursor-pointer hover:bg-gray-50 hover:border-gray-300 hover:shadow-md hover:border-l-4 hover:border-l-gray-500 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 ease-in-out rounded-lg mx-1 px-3 group"

@@ -173,7 +173,7 @@ const HouseholdDetail: React.FC = () => {
   const [showHouseholdOptions, setShowHouseholdOptions] = useState(false);
   const [showCategoryManagement, setShowCategoryManagement] = useState(false);
   const [showInviteMember, setShowInviteMember] = useState(false);
-  const [showExpenseSummary, setShowExpenseSummary] = useState(false);
+  const [showExpenseSummary, setShowExpenseSummary] = useState(true);
 
   useEffect(() => {
     if (id) {
