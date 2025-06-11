@@ -272,6 +272,17 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-500 group-hover:text-gray-600 transition-colors duration-200">
             {formatDate(expense.created_at)}
+            {expense.category && (
+              <>
+                <a>&nbsp;&bull;&nbsp;</a>
+                {expense.category.icon && (
+                  <span className="mr-1 text-sm">{expense.category.icon}</span>
+                )}
+                <span className="text-xs text-gray-500 group-hover:text-gray-600 transition-colors duration-200">
+                  {expense.category.name}
+                </span>
+              </>
+            )}
           </span>
 
           <div className="text-right">
