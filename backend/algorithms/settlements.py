@@ -99,21 +99,3 @@ def validate_settlement_plan(balances: dict[str | int, float],
             return False
 
     return True
-
-
-if __name__ == '__main__':
-    balances_example: dict[str | int, float] = {
-        'user1': 0.01,
-        'user2': -0.03,
-        'user3': 0.02,
-    }
-
-    transactions = optimal_settlements(balances_example)
-
-    print(validate_settlement_plan(balances_example, transactions))
-
-    for transaction in transactions:
-        print(
-            f'{transaction.payer_id} pays {transaction.payee_id} '
-            f'${transaction.amount:.2f}'
-        )

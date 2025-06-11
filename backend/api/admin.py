@@ -7,11 +7,16 @@ from .models import (
 )
 
 
+class ExpenseSplitAdmin(admin.ModelAdmin):
+    list_display = ('expense', 'user', 'amount', 'is_settled')
+    search_fields = ('expense__description', 'user__username', 'is_settled')
+
+
 admin.site.register(User)
 admin.site.register(Household)
 admin.site.register(Membership)
 admin.site.register(Expense)
-admin.site.register(ExpenseSplit)
+admin.site.register(ExpenseSplit, ExpenseSplitAdmin)
 admin.site.register(ExpenseCategory)
 admin.site.register(Task)
 admin.site.register(ShoppingListItem)

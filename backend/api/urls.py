@@ -8,7 +8,8 @@ from .views import (
     ExpenseListCreateView, ExpenseDetailView, user_expense_summary, household_expense_summary,
     ExpenseCategoryListCreateView, ExpenseCategoryDetailView, household_categories,
     TaskListCreateView, TaskDetailView,
-    ShoppingListItemListCreateView, ShoppingListItemDetailView
+    ShoppingListItemListCreateView, ShoppingListItemDetailView,
+    household_balances, household_settlement_plan, process_settlement
 )
 
 urlpatterns = [
@@ -34,4 +35,9 @@ urlpatterns = [
     path('households/<int:household_id>/shopping-list/',
          ShoppingListItemListCreateView.as_view()),
     path('shopping-lists/<int:pk>/', ShoppingListItemDetailView.as_view()),
+    path('households/<int:household_id>/balances/', household_balances),
+    path('households/<int:household_id>/settlement-plan/',
+         household_settlement_plan),
+    path('households/<int:household_id>/settlement-process/',
+         process_settlement),
 ]

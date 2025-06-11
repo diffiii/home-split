@@ -95,6 +95,10 @@ SPECTACULAR_SETTINGS = {
             'name': '8. Shopping List Items',
             'description': 'Shopping list item management operations',
         },
+        {
+            'name': '9. Settlements',
+            'description': 'Settlement management operations',
+        },
     ]
 }
 

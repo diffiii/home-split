@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.db import models
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
@@ -7,6 +8,7 @@ from rest_framework.response import Response
 
 from ..models import Expense, Household, ExpenseCategory
 from ..serializers import ExpenseSerializer, ExpenseListSerializer
+from algorithms.statistics import *
 
 
 @extend_schema(tags=['6. Expenses'])
@@ -154,30 +156,14 @@ def user_expense_summary(request):
     """
     user = request.user
 
-    # Get all expenses from user's households
-    expenses = Expense.objects.filter(
-        household__members=user
-    ).select_related('payer').prefetch_related('splits')
+    total_expenses = Expense.objects.filter(
+        Q(payer=user) | Q(splits__user=user)
+    ).count()
 
-    # Calculate summary statistics
-    total_expenses = expenses.count()
-    total_amount_paid = sum(
-        expense.amount for expense in expenses if expense.payer == user
-    )
-    total_amount_paid_self = sum(
-        split.amount for expense in expenses
-        for split in expense.splits.all()   # type: ignore
-        if split.user == user and split.is_settled
-    )
-    total_amount_owed = sum(
-        split.amount for expense in expenses
-        for split in expense.splits.all()   # type: ignore
-        if split.user == user and not split.is_settled
-    )
-
-    net_balance = (
-        total_amount_paid - total_amount_owed - total_amount_paid_self
-    )
+    total_amount_paid = calculate_user_amount_paid(user)
+    total_amount_paid_self = calculate_user_amount_paid_self(user)
+    total_amount_owed = calculate_user_amount_owed(user)
+    net_balance = calculate_user_net_balance(user)
 
     summary = {
         'total_expenses': total_expenses,
@@ -211,42 +197,31 @@ def household_expense_summary(request, household_id):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    # Get all expenses for this household
+    total_expenses = Expense.objects.filter(household=household).count()
+    total_amount = Expense.objects.filter(household=household).aggregate(
+        total_amount=models.Sum('amount')
+    )['total_amount'] or 0
+
     expenses = Expense.objects.filter(
         household=household
-    ).select_related('payer').prefetch_related('splits')
+    ).prefetch_related('splits')
 
-    # Calculate summary statistics
-    total_expenses = expenses.count()
-    total_amount = sum(expense.amount for expense in expenses)
     total_settled = sum(
         split.amount for expense in expenses
-        for split in expense.splits.all()   # type: ignore
+        for split in expense.splits.all()  # type: ignore
         if split.is_settled
     )
+
     total_unsettled = sum(
         split.amount for expense in expenses
-        for split in expense.splits.all()   # type: ignore
+        for split in expense.splits.all()  # type: ignore
         if not split.is_settled
     )
 
-    user_amount_paid = sum(
-        expense.amount for expense in expenses if expense.payer == user
-    )
-    user_amount_paid_self = sum(
-        split.amount for expense in expenses
-        for split in expense.splits.all()   # type: ignore
-        if split.user == user and split.is_settled
-    )
-    user_amount_owed = sum(
-        split.amount for expense in expenses
-        for split in expense.splits.all()   # type: ignore
-        if split.user == user and not split.is_settled
-    )
-
-    user_balance = (
-        user_amount_paid - user_amount_owed - user_amount_paid_self
-    )
+    user_amount_paid = calculate_user_amount_paid(user, household)
+    user_amount_paid_self = calculate_user_amount_paid_self(user, household)
+    user_amount_owed = calculate_user_amount_owed(user, household)
+    user_balance = calculate_user_net_balance(user, household)
 
     summary = {
         'household_id': household_id,
