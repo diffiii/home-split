@@ -97,6 +97,9 @@ class ExpenseSerializer(serializers.ModelSerializer):
 
         # Create expense splits
         for split_data in splits_data:
+            if split_data['user_id'] == validated_data['payer_id']:
+                split_data['is_settled'] = True
+
             ExpenseSplit.objects.create(
                 expense=expense,
                 user_id=split_data['user_id'],

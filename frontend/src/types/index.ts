@@ -130,8 +130,8 @@ export interface CreateTaskData {
 export interface ExpenseSummary {
   total_expenses: number;
   total_amount_paid: number;
+  total_amount_paid_self: number;
   total_amount_owed: number;
-  total_amount_settled: number;
   net_balance: number;
 }
 
@@ -142,6 +142,8 @@ export interface HouseholdExpenseSummary {
   total_amount: number;
   total_settled: number;
   total_unsettled: number;
-  user_paid: number;
-  user_owes: number;
+  user_amount_paid: number;
+  user_amount_paid_self: number;
+  user_amount_owed: number;
+  user_balance: number;
 }

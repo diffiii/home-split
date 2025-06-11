@@ -164,31 +164,26 @@ def user_expense_summary(request):
     total_amount_paid = sum(
         expense.amount for expense in expenses if expense.payer == user
     )
+    total_amount_paid_self = sum(
+        split.amount for expense in expenses
+        for split in expense.splits.all()   # type: ignore
+        if split.user == user and split.is_settled
+    )
     total_amount_owed = sum(
         split.amount for expense in expenses
         for split in expense.splits.all()   # type: ignore
         if split.user == user and not split.is_settled
     )
-    total_amount_settled = sum(
-        split.amount for expense in expenses
-        for split in expense.splits.all()   # type: ignore
-        if split.user == user and split.is_settled
-    )
-    total_amount_owed_from_other = sum(
-        split.amount for expense in expenses
-        for split in expense.splits.all()   # type: ignore
-        if split.user != user and not split.is_settled
-    )
 
     net_balance = (
-        total_amount_owed_from_other
+        total_amount_paid - total_amount_owed - total_amount_paid_self
     )
 
     summary = {
         'total_expenses': total_expenses,
         'total_amount_paid': total_amount_paid,
+        'total_amount_paid_self': total_amount_paid_self,
         'total_amount_owed': total_amount_owed,
-        'total_amount_settled': total_amount_settled,
         'net_balance': net_balance,
     }
 
@@ -235,14 +230,22 @@ def household_expense_summary(request, household_id):
         if not split.is_settled
     )
 
-    # User-specific statistics
-    user_paid = sum(
+    user_amount_paid = sum(
         expense.amount for expense in expenses if expense.payer == user
     )
-    user_owes = sum(
+    user_amount_paid_self = sum(
         split.amount for expense in expenses
-        for split in expense.splits.all()  # type: ignore
+        for split in expense.splits.all()   # type: ignore
+        if split.user == user and split.is_settled
+    )
+    user_amount_owed = sum(
+        split.amount for expense in expenses
+        for split in expense.splits.all()   # type: ignore
         if split.user == user and not split.is_settled
+    )
+
+    user_balance = (
+        user_amount_paid - user_amount_owed - user_amount_paid_self
     )
 
     summary = {
@@ -252,8 +255,10 @@ def household_expense_summary(request, household_id):
         'total_amount': total_amount,
         'total_settled': total_settled,
         'total_unsettled': total_unsettled,
-        'user_paid': user_paid,
-        'user_owes': user_owes,
+        'user_amount_paid': user_amount_paid,
+        'user_amount_paid_self': user_amount_paid_self,
+        'user_amount_owed': user_amount_owed,
+        'user_balance': user_balance,
     }
 
     return Response(summary, status=status.HTTP_200_OK)

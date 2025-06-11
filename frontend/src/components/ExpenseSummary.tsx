@@ -41,7 +41,7 @@ const ExpenseSummary: React.FC<ExpenseSummaryProps> = ({ summary, isLoading }) =
     }).format(amount);
   };
 
-  const userBalance = summary.user_paid - summary.user_owes;
+  const userBalance = summary.user_balance;
   const isOwedMoney = userBalance > 0;
   const isOwingMoney = userBalance < 0;
 
@@ -98,14 +98,14 @@ const ExpenseSummary: React.FC<ExpenseSummaryProps> = ({ summary, isLoading }) =
           <div className="bg-gray-50 rounded-lg p-2 sm:p-4">
             <div className="text-xs sm:text-sm text-gray-600 mb-1">You Paid</div>
             <div className="text-base sm:text-xl font-semibold text-black">
-              {formatCurrency(parseFloat(summary.user_paid.toString()))}
+              {formatCurrency(parseFloat(summary.user_amount_paid.toString()))}
             </div>
           </div>
 
           <div className="bg-gray-50 rounded-lg p-2 sm:p-4">
             <div className="text-xs sm:text-sm text-gray-600 mb-1">You Owe</div>
             <div className="text-base sm:text-xl font-semibold text-black">
-              {formatCurrency(parseFloat(summary.user_owes.toString()))}
+              {formatCurrency(parseFloat(summary.user_amount_owed.toString()))}
             </div>
           </div>
 
