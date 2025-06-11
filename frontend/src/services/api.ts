@@ -9,7 +9,9 @@ import {
   RawMembership,
   Expense,
   CreateExpenseData,
-  ExpenseCategory
+  ExpenseCategory,
+  Task,
+  CreateTaskData
 } from '../types';
 
 const API_BASE_URL = 'http://localhost:8000/api';
@@ -248,6 +250,27 @@ export const expenseAPI = {
 
   deleteExpenseCategory: async (categoryId: number): Promise<void> => {
     await api.delete(`/categories/${categoryId}/`);
+  }
+};
+
+export const taskAPI = {
+  getTasks: async (householdId: number): Promise<Task[]> => {
+    const response = await api.get(`/households/${householdId}/tasks/`);
+    return response.data;
+  },
+
+  createTask: async (householdId: number, data: CreateTaskData): Promise<Task> => {
+    const response = await api.post(`/households/${householdId}/tasks/`, data);
+    return response.data;
+  },
+
+  updateTask: async (taskId: number, data: Partial<CreateTaskData>): Promise<Task> => {
+    const response = await api.patch(`/tasks/${taskId}/`, data);
+    return response.data;
+  },
+
+  deleteTask: async (taskId: number): Promise<void> => {
+    await api.delete(`/tasks/${taskId}/`);
   }
 };
 

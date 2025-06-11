@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Household, User, Expense } from '../types';
-import { householdAPI, expenseAPI } from '../services/api';
+import { Household, User, Expense, Task } from '../types';
+import { householdAPI, expenseAPI, taskAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import Button from '../components/Button';
@@ -10,6 +10,8 @@ import ExpenseList from '../components/ExpenseList';
 import AddExpense from '../components/AddExpense';
 import HouseholdOptionsModal from '../components/HouseholdOptionsModal';
 import CategoryManagement from '../components/CategoryManagement';
+import TaskList from '../components/TaskList';
+import AddTask from '../components/AddTask';
 
 const HouseholdIcon: React.FC<{ name: string; size?: 'small' | 'large' }> = ({
   name,
@@ -120,11 +122,15 @@ const HouseholdDetail: React.FC = () => {
   const { user } = useAuth();
   const [household, setHousehold] = useState<Household | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingExpenses, setIsLoadingExpenses] = useState(false);
+  const [isLoadingTasks, setIsLoadingTasks] = useState(false);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState<'expenses' | 'tasks'>('expenses');
   const [showMembers, setShowMembers] = useState(false);
   const [showAddExpense, setShowAddExpense] = useState(false);
+  const [showAddTask, setShowAddTask] = useState(false);
   const [showHouseholdOptions, setShowHouseholdOptions] = useState(false);
   const [showCategoryManagement, setShowCategoryManagement] = useState(false);
 
@@ -137,6 +143,7 @@ const HouseholdDetail: React.FC = () => {
   useEffect(() => {
     if (household) {
       fetchExpenses(household.id);
+      fetchTasks(household.id);
     }
   }, [household]);
 
@@ -162,10 +169,33 @@ const HouseholdDetail: React.FC = () => {
     }
   };
 
+  const fetchTasks = async (householdId: number) => {
+    try {
+      setIsLoadingTasks(true);
+      const tasksData = await taskAPI.getTasks(householdId);
+      setTasks(tasksData);
+    } finally {
+      setIsLoadingTasks(false);
+    }
+  };
+
   const handleExpenseAdded = () => {
     setShowAddExpense(false);
     if (household) {
       fetchExpenses(household.id);
+    }
+  };
+
+  const handleTaskAdded = () => {
+    setShowAddTask(false);
+    if (household) {
+      fetchTasks(household.id);
+    }
+  };
+
+  const handleTaskUpdated = () => {
+    if (household) {
+      fetchTasks(household.id);
     }
   };
 
@@ -341,64 +371,153 @@ const HouseholdDetail: React.FC = () => {
         </div>
 
         <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-3 sm:space-y-0">
-            <h2 className="text-xl font-medium text-black">Expenses</h2>
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
-              <Button
-                variant="outline"
-                onClick={() => setShowCategoryManagement(true)}
-                className="w-full sm:w-auto flex items-center justify-center"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                  />
-                </svg>
-                Manage Categories
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => setShowAddExpense(true)}
-                className="w-full sm:w-auto"
-              >
-                Add Expense
-              </Button>
-            </div>
+          {/* Tab Navigation */}
+          <div className="flex space-x-1 mb-6 border-b border-gray-200">
+            <button
+              onClick={() => setActiveTab('expenses')}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'expenses'
+                  ? 'border-black text-black'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Expenses
+            </button>
+            <button
+              onClick={() => setActiveTab('tasks')}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === 'tasks'
+                  ? 'border-black text-black'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Tasks
+            </button>
           </div>
 
-          {isLoadingExpenses ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="flex items-center space-x-2 text-gray-600">
-                <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                <span>Loading expenses...</span>
+          {/* Tab Content */}
+          {activeTab === 'expenses' ? (
+            <>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-3 sm:space-y-0">
+                <h2 className="text-xl font-medium text-black">Expenses</h2>
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowCategoryManagement(true)}
+                    className="w-full sm:w-auto flex items-center justify-center"
+                  >
+                    <svg
+                      className="w-4 h-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                      />
+                    </svg>
+                    Manage Categories
+                  </Button>
+                  <Button
+                    variant="primary"
+                    onClick={() => setShowAddExpense(true)}
+                    className="w-full sm:w-auto"
+                  >
+                    Add Expense
+                  </Button>
+                </div>
               </div>
-            </div>
-          ) : user ? (
-            <ExpenseList
-              expenses={expenses}
-              currentUserId={user.id}
-              householdMembers={activeMembers}
-              householdId={household.id}
-              onExpenseUpdated={() => fetchExpenses(household.id)}
-            />
-          ) : null}
+
+              {isLoadingExpenses ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="flex items-center space-x-2 text-gray-600">
+                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span>Loading expenses...</span>
+                  </div>
+                </div>
+              ) : user ? (
+                <ExpenseList
+                  expenses={expenses}
+                  currentUserId={user.id}
+                  householdMembers={activeMembers}
+                  householdId={household.id}
+                  onExpenseUpdated={() => fetchExpenses(household.id)}
+                />
+              ) : null}
+            </>
+          ) : (
+            <>
+              {isLoadingTasks ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="flex items-center space-x-2 text-gray-600">
+                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span>Loading tasks...</span>
+                  </div>
+                </div>
+              ) : user ? (
+                <TaskList
+                  tasks={tasks}
+                  currentUserId={user.id}
+                  householdMembers={activeMembers}
+                  onTaskUpdated={handleTaskUpdated}
+                  householdId={household.id}
+                  addTaskButton={
+                    <Button
+                      variant="primary"
+                      onClick={() => setShowAddTask(true)}
+                      className="w-full sm:w-auto flex items-center justify-center"
+                    >
+                      <svg
+                        className="w-4 h-4 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        />
+                      </svg>
+                      Add Task
+                    </Button>
+                  }
+                />
+              ) : null}
+            </>
+          )}
         </div>
 
         {/* Add Expense Modal */}
@@ -409,6 +528,15 @@ const HouseholdDetail: React.FC = () => {
             currentUserId={user.id}
             onExpenseAdded={handleExpenseAdded}
             onCancel={() => setShowAddExpense(false)}
+          />
+        )}
+
+        {/* Add Task Modal */}
+        {showAddTask && user && (
+          <AddTask
+            householdId={household.id}
+            onTaskAdded={handleTaskAdded}
+            onCancel={() => setShowAddTask(false)}
           />
         )}
 

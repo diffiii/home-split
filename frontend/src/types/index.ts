@@ -107,3 +107,22 @@ export interface SplitConfiguration {
   members: SplitMember[];
   totalAmount: number;
 }
+
+export interface Task {
+  id: number;
+  name: string;
+  description?: string;
+  household: number;
+  due_date?: string;
+  added_by: User;
+  is_completed: boolean;
+  created_at: string;
+}
+
+export interface CreateTaskData {
+  name: string;
+  description?: string;
+  due_date?: string;
+  household?: number;
+  is_completed?: boolean;
+}
