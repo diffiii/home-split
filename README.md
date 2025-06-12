@@ -22,6 +22,7 @@ HomeSplit is a web application designed to simplify household managemnt by enabl
 - **Django REST Framework**: Toolkit for building Web APIs
 - **SQLite**: Lightweight database for development
 - **JWT Authentication**: Secure user authentication
+- **DRF Spectacular**: Swagger UI wrapper for API endpoints
 
 ### Frontend
 - **React**: JavaScript library for building user interfaces
