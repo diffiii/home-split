@@ -64,7 +64,6 @@ const SettlementModal: React.FC<SettlementModalProps> = ({
       setBalances(balancesData);
     } catch (err: any) {
       setError('Failed to fetch balances');
-      console.error('Failed to fetch balances:', err);
     } finally {
       setIsLoadingBalances(false);
     }
@@ -77,7 +76,6 @@ const SettlementModal: React.FC<SettlementModalProps> = ({
       setSettlementPlan(planData);
     } catch (err: any) {
       setError('Failed to fetch settlement plan');
-      console.error('Failed to fetch settlement plan:', err);
     } finally {
       setIsLoadingPlan(false);
     }
@@ -120,9 +118,8 @@ const SettlementModal: React.FC<SettlementModalProps> = ({
         amount
       };
 
-    const result = await settlementAPI.processSettlement(householdId, data);
-    console.log(result);
-    setProcessingResult(result);
+      const result = await settlementAPI.processSettlement(householdId, data);
+      setProcessingResult(result);
       
       // Refresh data
       await fetchData();

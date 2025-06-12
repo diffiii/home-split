@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Household, User } from '../types';
 import Modal from './Modal';
 import Button from './Button';
 import Input from './Input';
 import UserAvatar from './UserAvatar';
-import { householdAPI, membershipAPI } from '../services/api';
+import { householdAPI, membershipAPI, settlementAPI, expenseAPI } from '../services/api';
 
 interface HouseholdOptionsModalProps {
   isOpen: boolean;
@@ -66,6 +66,7 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
   const [activeTab, setActiveTab] = useState<'name' | 'members' | 'delete'>('name');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [canDeleteHousehold, setCanDeleteHousehold] = useState(true);
 
   const [newName, setNewName] = useState(household.name);
   const [newDescription, setNewDescription] = useState(household.description || '');
@@ -124,18 +125,29 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
     }
   };
 
-  const checkCanDeleteMember = (memberId: number) => {
+  const checkCanDeleteMember = async (memberId: number): Promise<boolean> => {
     if (memberId === household.owner.id) {
       return false;
     }
 
-    // TODO: Add expense settlement validation
-    return true;
+    try {
+      const balancesData = await settlementAPI.getHouseholdBalances(household.id);
+      const memberBalance = balancesData.balances.find(b => b.user_id === memberId)?.balance || 0;
+      return memberBalance === 0;
+    } catch (error) {
+      return false;
+    }
   };
 
-  const checkCanDeleteHousehold = () => {
-    // TODO: Add expense settlement validation
-    return true;
+  const checkCanDeleteHousehold = async () => {
+    try {
+      const summary = await expenseAPI.getHouseholdExpenseSummary(household.id);
+      console.log(summary.total_unsettled)
+      setCanDeleteHousehold(summary.total_unsettled === 0);
+    } catch (error) {
+      setError('Failed to check household expenses. Please try again later.');
+      setCanDeleteHousehold(false);
+    }
   };
 
   const handleDeleteHousehold = async () => {
@@ -155,6 +167,11 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
 
   const renderNameTab = () => (
     <div className="space-y-4">
+      {error && (
+        <div className="bg-red-500/20 border border-red-500/30 text-red-800 p-3 rounded-xl backdrop-blur-sm text-sm">
+          {error}
+        </div>
+      )}
       <div>
         <Input
           type="text"
@@ -180,9 +197,6 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-black transition-all resize-none text-sm"
         />
       </div>
-
-      {error && <div className="text-red-600 text-sm">{error}</div>}
-
       <div className="flex space-x-3">
         <Button
           onClick={handleSaveName}
@@ -203,10 +217,15 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
 
   const renderMembersTab = () => (
     <div className="space-y-4">
+      {error && (
+        <div className="bg-red-500/20 border border-red-500/30 text-red-800 p-3 rounded-xl backdrop-blur-sm text-sm">
+          {error}
+        </div>
+      )}
       <div className="space-y-3">
         {activeMembers.map(member => {
           const isCurrentUser = member.id === currentUser.id;
-          const canRemoveMember = checkCanDeleteMember(member.id);
+          const canRemoveMember = member.id !== household.owner.id;
 
           return (
             <div
@@ -230,9 +249,18 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
 
               {!isCurrentUser && (
                 <div className="flex items-center space-x-2">
-                  {!canRemoveMember && <span className="text-xs text-gray-500">Cannot remove</span>}
+                  {!canRemoveMember && (
+                    <span className="text-xs text-gray-500">Owner</span>
+                  )}
                   <Button
-                    onClick={() => setShowRemoveMemberConfirm(member.id)}
+                    onClick={async () => {
+                      const canDelete = await checkCanDeleteMember(member.id);
+                      if (canDelete) {
+                        setShowRemoveMemberConfirm(member.id);
+                      } else {
+                        setError('Cannot remove member: they have unsettled balances');
+                      }
+                    }}
                     variant="outline"
                     size="sm"
                     disabled={isLoading || !canRemoveMember}
@@ -250,12 +278,9 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
           );
         })}
       </div>
-
-      {error && <div className="text-red-600 text-sm">{error}</div>}
-
       <div className="pt-2 border-t border-gray-200">
         <p className="text-xs text-gray-500">
-          Note: Members can only be removed if they don't owe money to others in the household.
+          Note: Members can only be removed if they have settled all balances. Balance will be checked when you click Remove.
         </p>
       </div>
     </div>
@@ -263,6 +288,11 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
 
   const renderDeleteTab = () => (
     <div className="space-y-4">
+      {error && (
+        <div className="bg-red-500/20 border border-red-500/30 text-red-800 p-3 rounded-xl backdrop-blur-sm text-sm">
+          {error}
+        </div>
+      )}
       <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
         <div className="flex items-start space-x-3">
           <svg
@@ -297,12 +327,23 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
         </ul>
       </div>
 
-      {error && <div className="text-red-600 text-sm">{error}</div>}
+      {!canDeleteHousehold && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+          <div className="flex items-start space-x-2">
+            <svg className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <p className="text-sm text-yellow-800">
+              Cannot delete household: There are unsettled expenses. Please settle all expenses before deleting.
+            </p>
+          </div>
+        </div>
+      )}
 
       <Button
         onClick={() => setShowDeleteHouseholdConfirm(true)}
         variant="danger"
-        disabled={isLoading || !checkCanDeleteHousehold()}
+        disabled={isLoading || !canDeleteHousehold}
         className="w-full"
       >
         {isLoading ? 'Deleting...' : 'Delete Household'}
@@ -317,7 +358,10 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
           {/* Tab Navigation */}
           <div className="flex border-b border-gray-200">
             <button
-              onClick={() => setActiveTab('name')}
+              onClick={() => {
+                setActiveTab('name');
+                setError('');
+              }}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'name'
                   ? 'border-black text-black'
@@ -327,7 +371,10 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
               Name & Details
             </button>
             <button
-              onClick={() => setActiveTab('members')}
+              onClick={() => {
+                setActiveTab('members');
+                setError('');
+              }}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'members'
                   ? 'border-black text-black'
@@ -337,7 +384,11 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
               Members
             </button>
             <button
-              onClick={() => setActiveTab('delete')}
+              onClick={() => {
+                setActiveTab('delete');
+                setError('');
+                checkCanDeleteHousehold();
+              }}
               className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'delete'
                   ? 'border-red-600 text-red-600'

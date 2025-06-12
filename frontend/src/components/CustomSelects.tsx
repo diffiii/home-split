@@ -168,7 +168,7 @@ export const UserSelect: React.FC<UserSelectProps> = ({
         <div className="flex items-center space-x-2 flex-1">
           {selectedUser ? (
             <>
-              <UserAvatar user={selectedUser} size="xs" />
+              <UserAvatar userId={selectedUser.id} size="xs" />
               <span className="text-gray-900">{selectedUser.username}</span>
             </>
           ) : (
