@@ -291,7 +291,8 @@ const SettlementModal: React.FC<SettlementModalProps> = ({
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span className="text-blue-800 text-sm font-medium">
-                          {settlementPlan.total_transactions} transaction{settlementPlan.total_transactions !== 1 ? 's' : ''} needed to settle all debts
+                          <a>{settlementPlan.total_transactions} transaction{settlementPlan.total_transactions !== 1 ? 's' : ''} needed to settle all debts.</a>
+                          <a>&nbsp;Only the payees can process these transactions.</a>
                         </span>
                       </div>
                     </div>
