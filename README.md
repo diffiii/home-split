@@ -5,7 +5,15 @@ HomeSplit is a web application designed to simplify household managemnt by enabl
 ![HomeSplit Home Page](.assets/homepage.png)
 
 ## Features
-TODO: ...
+
+- **💰 Expense Tracking** - Add expenses and split them automatically among household members
+- **✅ Task Management** - Create and track household tasks with due dates
+- **🛒 Shopping Lists** - Collaborative shopping lists that sync in real-time
+- **👥 Household Management** - Create households and invite members to join
+- **🔐 Secure Authentication** - User registration and login with JWT tokens
+- **📱 Responsive Design** - Works seamlessly on desktop and mobile devices
+
+![HomeSplit Household Dashboard](.assets/household.png)
 
 ## Technologies Used
 
