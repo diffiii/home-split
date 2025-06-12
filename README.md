@@ -140,6 +140,34 @@ The backend API will be available at `http://localhost:8000/api/`.
 
 The frontend will be available at `http://localhost:3000/`.
 
+### Sample Data
+
+To quickly set up the database with sample data, you can run the following command in the backend directory:
+
+```bash
+cd backend
+python manage.py loaddata ../data/sample_data.json
+```
+
+In case you experience issues with the sample data encoding, you can use the following command to load the data with UTF-8 encoding:
+
+```bash
+cd backend
+python -Xutf8 manage.py loaddata ../data/sample_data.json
+```
+
+This will populate the database with predefined households, users, expenses, tasks, and shopping lists for testing purposes. 
+
+You can use two predefined users:
+
+- **User 1**: 
+
+    `email: maya@smith.com`, `password: testing321`
+
+- **User 2**: 
+
+    `email: kinny@jones.us`, `password: testing321`
+
 ### API Endpoints
 
 The list of available API endpoints can be found at `http://localhost:8000/api/docs/` once the backend server is running. This includes endpoints for user authentication, expense tracking, task management, and more.
