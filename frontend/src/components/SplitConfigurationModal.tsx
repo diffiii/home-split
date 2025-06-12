@@ -205,7 +205,7 @@ const SplitConfigurationModal: React.FC<SplitConfigurationModalProps> = ({
                   <input
                     type="text"
                     inputMode="decimal"
-                    pattern={splitType === 'percentage' ? '[0-9]*' : '[0-9]*(\.[0-9]+)?'}
+                    pattern={splitType === 'percentage' ? '[0-9]*' : '[0-9]*(\.\,[0-9]+)?'}
                     step={splitType === 'parts' ? '1' : '0.01'}
                     min={splitType === 'percentage' ? '0' : undefined}
                     max={splitType === 'percentage' ? '100' : undefined}
@@ -214,6 +214,22 @@ const SplitConfigurationModal: React.FC<SplitConfigurationModalProps> = ({
                         inputValuesBySplitType[splitType][member.user_id]) ||
                       ''
                     }
+                    onInput ={e => {
+                      const target = e.target as HTMLInputElement;
+                      let value = target.value.replace(/[^0-9.,]/g, '');
+                      value = value.replace(/,/g, '.');
+                      const parts = value.split('.');
+
+                      if (parts.length > 2) {
+                        value = parts[0] + '.' + parts.slice(1).join('');
+                      }
+
+                      if (parts.length === 2 && parts[1].length > 2) {
+                        value = parts[0] + '.' + parts[1].substring(0, 2);
+                      }
+
+                      target.value = value;
+                    }}
                     onChange={e => {
                       handleValueChange(member.user_id, e.target.value);
                     }}

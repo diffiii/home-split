@@ -167,3 +167,48 @@ export interface CreateShoppingListItemData {
   unit?: string;
   household?: number;
 }
+
+export interface UserBalance {
+  user_id: number;
+  username: string;
+  balance: number;
+}
+
+export interface HouseholdBalances {
+  household_id: number;
+  household_name: string;
+  balances: UserBalance[];
+}
+
+export interface SettlementTransaction {
+  payer_id: number;
+  payer_username: string;
+  payee_id: number;
+  payee_username: string;
+  amount: number;
+}
+
+export interface SettlementPlan {
+  household_id: number;
+  household_name: string;
+  settlement_plan: SettlementTransaction[];
+  total_transactions: number;
+}
+
+export interface ProcessSettlementData {
+  payer_id: number;
+  payee_id: number;
+  amount: number;
+}
+
+export interface ProcessSettlementResult {
+  household_id: number;
+  payer_id: number;
+  payer_username: string;
+  payee_id: number;
+  payee_username: string;
+  payment_amount: number;
+  optimal_amount: number;
+  case: number;
+  actions_taken: string[];
+}

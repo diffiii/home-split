@@ -18,6 +18,7 @@ import AddShoppingListItem from '../components/AddShoppingListItem';
 import Modal from '../components/Modal';
 import InviteMember from '../components/InviteMember';
 import ExpenseSummary from '../components/ExpenseSummary';
+import SettlementModal from '../components/SettlementModal';
 
 const HouseholdIcon: React.FC<{ name: string; size?: 'small' | 'large' }> = ({
   name,
@@ -174,6 +175,7 @@ const HouseholdDetail: React.FC = () => {
   const [showCategoryManagement, setShowCategoryManagement] = useState(false);
   const [showInviteMember, setShowInviteMember] = useState(false);
   const [showExpenseSummary, setShowExpenseSummary] = useState(true);
+  const [showSettlementModal, setShowSettlementModal] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -301,6 +303,13 @@ const HouseholdDetail: React.FC = () => {
     }
   };
 
+  const handleSettlementProcessed = () => {
+    if (household) {
+      fetchExpenses(household.id);
+      fetchExpenseSummary(household.id);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white">
@@ -401,7 +410,7 @@ const HouseholdDetail: React.FC = () => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.50 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
                 />
                 <path
                   strokeLinecap="round"
@@ -573,6 +582,26 @@ const HouseholdDetail: React.FC = () => {
                       />
                     </svg>
                     Manage Categories
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowSettlementModal(true)}
+                    className="w-full sm:w-auto flex items-center justify-center"
+                  >
+                    <svg
+                      className="w-4 h-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                      />
+                    </svg>
+                    Settlements
                   </Button>
                   <Button
                     variant="primary"
@@ -860,6 +889,19 @@ const HouseholdDetail: React.FC = () => {
               onCancel={() => setShowInviteMember(false)}
             />
           </Modal>
+        )}
+
+        {/* Settlement Modal */}
+        {showSettlementModal && user && (
+          <SettlementModal
+            isOpen={showSettlementModal}
+            onClose={() => setShowSettlementModal(false)}
+            householdId={household.id}
+            householdName={household.name}
+            currentUserId={user.id}
+            householdMembers={activeMembers}
+            onSettlementProcessed={handleSettlementProcessed}
+          />
         )}
       </main>
     </div>

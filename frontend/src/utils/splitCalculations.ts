@@ -185,18 +185,6 @@ export const validateSplitConfiguration = (config: SplitConfiguration, totalAmou
       }
       break;
     }
-
-    case 'plus_minus': {
-      const totalAdjustments = getTotalValue(config.members);
-
-      if (Math.abs(totalAdjustments) > totalAmount) {
-        validations.isValid = false;
-        validations.errors.push(
-          `Total adjustments ($${totalAdjustments.toFixed(2)}) exceed expense total ($${totalAmount.toFixed(2)}).`
-        );
-      }
-      break;
-    }
   }
 
   return validations;
