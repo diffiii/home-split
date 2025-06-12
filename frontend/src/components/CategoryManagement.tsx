@@ -301,7 +301,7 @@ const CategoryManagement: React.FC<CategoryManagementProps> = ({
                 />
               </svg>
               <span className="text-sm text-blue-800">
-                Only the household owner can add or delete categories.
+                Only the household owner can delete categories.
               </span>
             </div>
           </div>

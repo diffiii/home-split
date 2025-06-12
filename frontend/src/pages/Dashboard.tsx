@@ -406,11 +406,11 @@ const CreateHouseholdForm: React.FC<CreateHouseholdFormProps> = ({
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-        <Button type="submit" variant="primary" className="flex-1">
-          Create Household
-        </Button>
         <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
           Cancel
+        </Button>
+        <Button type="submit" variant="primary" className="flex-1">
+          Create Household
         </Button>
       </div>
     </form>
