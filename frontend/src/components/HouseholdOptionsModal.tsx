@@ -198,6 +198,9 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
         />
       </div>
       <div className="flex space-x-3">
+        <Button onClick={onClose} variant="outline" className="flex-1">
+          Cancel
+        </Button>
         <Button
           onClick={handleSaveName}
           disabled={
@@ -207,9 +210,6 @@ const HouseholdOptionsModal: React.FC<HouseholdOptionsModalProps> = ({
           className="flex-1"
         >
           {isLoading ? 'Saving...' : 'Save Changes'}
-        </Button>
-        <Button onClick={onClose} variant="outline" className="flex-1">
-          Cancel
         </Button>
       </div>
     </div>

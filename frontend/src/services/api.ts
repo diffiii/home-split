@@ -5,10 +5,10 @@ import {
   RegisterData,
   User,
   Household,
-  Membership,
   RawMembership,
   Expense,
   CreateExpenseData,
+  CreateExpenseSplit,
   ExpenseCategory,
   Task,
   CreateTaskData,
@@ -236,10 +236,21 @@ export const expenseAPI = {
 
   updateExpense: async (
     expenseId: number,
-    data: { category_id?: number | null }
+    data: { 
+      category_id?: number | null;
+      name?: string;
+      description?: string;
+      amount?: string;
+      payer_id?: number;
+      splits_data?: CreateExpenseSplit[];
+    }
   ): Promise<Expense> => {
     const response = await api.patch(`/expenses/${expenseId}/`, data);
     return response.data;
+  },
+
+  deleteExpense: async (expenseId: number): Promise<void> => {
+    await api.delete(`/expenses/${expenseId}/`);
   },
 
   getHouseholdCategories: async (householdId: number): Promise<ExpenseCategory[]> => {

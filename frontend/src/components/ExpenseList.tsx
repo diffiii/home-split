@@ -4,6 +4,8 @@ import { expenseAPI } from '../services/api';
 import UserAvatar from './UserAvatar';
 import { CategorySelect } from './CustomSelects';
 import Modal from './Modal';
+import Button from './Button';
+import AddExpense from './AddExpense';
 
 const updateExpenseCategory = async (
   expenseId: number,
@@ -54,6 +56,8 @@ const ExpenseDetail: React.FC<ExpenseDetailProps> = ({
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -116,6 +120,43 @@ const ExpenseDetail: React.FC<ExpenseDetailProps> = ({
   const othersOweAmount = isPayer ? totalAmount - currentUserAmount : 0;
 
   const payer = expense.payer || (payerId ? getUserById(payerId) : null);
+
+  // Check if user can edit this expense
+  const canEdit = expense.author?.id === currentUserId && expense.name !== "<<<SETTLEMENT ADJUSTMENT>>>";
+
+  const handleEditComplete = () => {
+    setShowEditModal(false);
+    onExpenseUpdated();
+  };
+
+  const handleDeleteExpense = async () => {
+    if (!window.confirm('Are you sure you want to delete this expense? This action cannot be undone.')) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await expenseAPI.deleteExpense(expense.id);
+      onExpenseUpdated();
+      onClose();
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to delete expense');
+      setIsDeleting(false);
+    }
+  };
+
+  if (showEditModal) {
+    return (
+      <AddExpense
+        editExpense={expense}
+        householdId={householdId}
+        householdMembers={householdMembers}
+        currentUserId={currentUserId}
+        onExpenseAdded={handleEditComplete}
+        onCancel={() => setShowEditModal(false)}
+      />
+    );
+  }
 
   return (
     <Modal isOpen={true} onClose={onClose} title="Expense Details">
@@ -216,6 +257,28 @@ const ExpenseDetail: React.FC<ExpenseDetailProps> = ({
             })}
           </div>
         </div>
+
+        {/* Edit and Delete Buttons */}
+        {canEdit && (
+          <div className="flex gap-3 pt-4 border-t border-gray-200">
+            <Button
+              onClick={() => setShowEditModal(true)}
+              variant="secondary"
+              className="text-sm flex-1"
+              disabled={isDeleting}
+            >
+              Edit Expense
+            </Button>
+            <Button
+              onClick={handleDeleteExpense}
+              variant="danger"
+              className="text-sm flex-1"
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Expense'}
+            </Button>
+          </div>
+        )}
       </div>
     </Modal>
   );
@@ -224,7 +287,6 @@ const ExpenseDetail: React.FC<ExpenseDetailProps> = ({
 const ExpenseItem: React.FC<ExpenseItemProps> = ({
   expense,
   currentUserId,
-  householdMembers,
   onClick
 }) => {
   const formatDate = (dateString: string) => {
@@ -237,10 +299,6 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({
 
   const formatAmount = (amount: string) => {
     return parseFloat(amount).toFixed(2);
-  };
-
-  const getUserById = (userId: number) => {
-    return householdMembers.find(member => member.id === userId);
   };
 
   // Get current user's split amount from the splits data

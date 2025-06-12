@@ -37,7 +37,6 @@ const Dashboard: React.FC = () => {
       setPendingInvitations(pendingInvitations);
     } catch (err: any) {
       setError('Failed to fetch dashboard data');
-      console.error('Dashboard fetch error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -53,14 +52,15 @@ const Dashboard: React.FC = () => {
       try {
         return await householdAPI.getHousehold(householdId);
       } catch (error) {
-        console.error('Failed to fetch household:', error);
         return null;
       }
     });
 
-    return (await Promise.all(householdPromises)).filter(
+    const households = (await Promise.all(householdPromises)).filter(
       (household): household is Household => household !== null
     );
+
+    return households.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   };
 
   const fetchPendingInvitations = async (
@@ -76,7 +76,6 @@ const Dashboard: React.FC = () => {
           const household = await householdAPI.getHousehold(membership.household);
           return { ...membership, user: user!, household };
         } catch (error) {
-          console.error('Failed to fetch household details for invitation:', error);
           return {
             ...membership,
             user: user!,
@@ -131,7 +130,7 @@ const Dashboard: React.FC = () => {
 
       createDefaultCategories(newHousehold.id);
 
-      setHouseholds(prev => [...prev, newHousehold]);
+      setHouseholds(prev => [newHousehold, ...prev]);
       resetCreateForm();
     } catch (err: any) {
       setError(err.response?.data?.name?.[0] || 'Failed to create household');

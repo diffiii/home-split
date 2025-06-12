@@ -3,6 +3,7 @@ import {
   User,
   ExpenseCategory,
   CreateExpenseData,
+  Expense,
   SplitType,
   SplitConfiguration,
   SplitMember
@@ -22,6 +23,7 @@ interface AddExpenseProps {
   currentUserId: number;
   onExpenseAdded: () => void;
   onCancel: () => void;
+  editExpense?: Expense; // Optional expense to edit
 }
 
 const AddExpense: React.FC<AddExpenseProps> = ({
@@ -29,14 +31,17 @@ const AddExpense: React.FC<AddExpenseProps> = ({
   householdMembers,
   currentUserId,
   onExpenseAdded,
-  onCancel
+  onCancel,
+  editExpense
 }) => {
+  const isEditing = !!editExpense;
+  
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    amount: '',
-    category_id: 0,
-    payer_id: currentUserId,
+    name: editExpense?.name || '',
+    description: editExpense?.description || '',
+    amount: editExpense?.amount || '',
+    category_id: editExpense?.category?.id || 0,
+    payer_id: editExpense?.payer_id || editExpense?.payer?.id || currentUserId,
     splitType: 'equal' as SplitType
   });
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
@@ -47,7 +52,7 @@ const AddExpense: React.FC<AddExpenseProps> = ({
   const [showSplitModal, setShowSplitModal] = useState(false);
 
   useEffect(() => {
-    if (!splitConfiguration && householdMembers.length > 0) {
+    if (!splitConfiguration) {
       const initialConfig: SplitConfiguration = {
         type: 'equal',
         members: householdMembers.map(user => ({
@@ -59,7 +64,7 @@ const AddExpense: React.FC<AddExpenseProps> = ({
       };
       setSplitConfiguration(initialConfig);
     }
-  }, [householdMembers, splitConfiguration]);
+  }, [householdMembers, splitConfiguration, isEditing, editExpense]);
 
   useEffect(() => {
     if (splitConfiguration && splitConfiguration.type !== formData.splitType) {
@@ -107,23 +112,38 @@ const AddExpense: React.FC<AddExpenseProps> = ({
 
     try {
       const amount = parseFloat(formData.amount);
-
       const splits_data = calculateSplitsForAPI(splitConfiguration, amount);
 
-      const expenseData: CreateExpenseData = {
-        household_id: householdId,
-        name: formData.name,
-        description: formData.description,
-        amount: formData.amount,
-        payer_id: formData.payer_id,
-        splits_data,
-        ...(formData.category_id > 0 && { category_id: formData.category_id })
-      };
+      if (isEditing && editExpense) {
+        // Update existing expense
+        const updateData = {
+          name: formData.name,
+          description: formData.description,
+          amount: formData.amount,
+          payer_id: formData.payer_id,
+          splits_data,
+          ...(formData.category_id > 0 ? { category_id: formData.category_id } : { category_id: null })
+        };
 
-      await expenseAPI.createExpense(expenseData);
+        await expenseAPI.updateExpense(editExpense.id, updateData);
+      } else {
+        // Create new expense
+        const expenseData: CreateExpenseData = {
+          household_id: householdId,
+          name: formData.name,
+          description: formData.description,
+          amount: formData.amount,
+          payer_id: formData.payer_id,
+          splits_data,
+          ...(formData.category_id > 0 && { category_id: formData.category_id })
+        };
+
+        await expenseAPI.createExpense(expenseData);
+      }
+      
       onExpenseAdded();
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to create expense');
+      setError(err.response?.data?.detail || `Failed to ${isEditing ? 'update' : 'create'} expense`);
     } finally {
       setIsLoading(false);
     }
@@ -157,6 +177,30 @@ const AddExpense: React.FC<AddExpenseProps> = ({
     }
   };
 
+  // Check if user can edit this expense
+  const canEdit = !isEditing || 
+                  (editExpense?.author?.id === currentUserId && 
+                   editExpense?.name !== "<<<SETTLEMENT ADJUSTMENT>>>");
+
+  if (isEditing && !canEdit) {
+    return (
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+        onClick={handleBackdropClick}
+      >
+        <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="text-center">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Cannot Edit Expense</h2>
+            <p className="text-gray-600 mb-4">
+              Only the expense author can edit this expense, and settlement adjustments cannot be edited.
+            </p>
+            <Button onClick={onCancel}>Close</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       {!showMemberModal && !showSplitModal && (
@@ -166,7 +210,9 @@ const AddExpense: React.FC<AddExpenseProps> = ({
         >
           <div className="bg-white rounded-lg p-4 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Add Expense</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                {isEditing ? 'Edit Expense' : 'Add Expense'}
+              </h2>
               <button onClick={onCancel} className="text-gray-400 hover:text-gray-600">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -288,7 +334,7 @@ const AddExpense: React.FC<AddExpenseProps> = ({
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary" disabled={isLoading} className="flex-1">
-                  {isLoading ? 'Adding...' : 'Add Expense'}
+                  {isLoading ? (isEditing ? 'Updating...' : 'Adding...') : (isEditing ? 'Update Expense' : 'Add Expense')}
                 </Button>
               </div>
             </form>

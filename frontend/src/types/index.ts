@@ -72,6 +72,7 @@ export interface Expense {
   name: string;
   description: string;
   amount: string;
+  author?: User;
   payer_id?: number;
   payer?: User;
   splits: ExpenseSplit[];
