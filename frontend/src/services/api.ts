@@ -15,7 +15,11 @@ import {
   ExpenseSummary,
   HouseholdExpenseSummary,
   ShoppingListItem,
-  CreateShoppingListItemData
+  CreateShoppingListItemData,
+  HouseholdBalances,
+  SettlementPlan,
+  ProcessSettlementData,
+  ProcessSettlementResult
 } from '../types';
 
 const API_BASE_URL = 'http://localhost:8000/api';
@@ -306,6 +310,23 @@ export const shoppingListAPI = {
 
   deleteShoppingListItem: async (itemId: number): Promise<void> => {
     await api.delete(`/shopping-lists/${itemId}/`);
+  }
+};
+
+export const settlementAPI = {
+  getHouseholdBalances: async (householdId: number): Promise<HouseholdBalances> => {
+    const response = await api.get(`/households/${householdId}/balances/`);
+    return response.data;
+  },
+
+  getSettlementPlan: async (householdId: number): Promise<SettlementPlan> => {
+    const response = await api.get(`/households/${householdId}/settlement-plan/`);
+    return response.data;
+  },
+
+  processSettlement: async (householdId: number, data: ProcessSettlementData): Promise<ProcessSettlementResult> => {
+    const response = await api.post(`/households/${householdId}/settlement-process/`, data);
+    return response.data;
   }
 };
 
